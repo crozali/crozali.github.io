@@ -28,7 +28,7 @@
     <script type="text/babel">
         const { useState } = React;
 
-        const INITIAL_PRODUCTS = [
+       const INITIAL_PRODUCTS = [
             {
                 id: '1',
                 name: 'Чоловічі Монкі',
@@ -52,20 +52,20 @@
                     'https://i.ibb.co/bR3bRqmr/image.png'
                 ],
                 description: 'Масивна підошва та преміальна шкіра. Твій зухвалий акцент у щоденному образі.'
+            },
+            {
+                id: '3',
+                name: 'Туфлі жіночі класичні чорні',
+                price: 2500,
+                gender: 'female',
+                images: [
+                    'https://i.ibb.co/rfNTYj7b/image.png', 
+                    'https://i.ibb.co/whD7q7zV/image.png', 
+                    'https://i.ibb.co/VpjDhLGb/image.png'
+                ],
+                description: 'Класичні жіночі туфлі каблук 6 см, натур шкіра, натуральний підклад шевро'
             }
         ];
-        {
-  id: '3',
-  name: 'туфлі жіночі класичні чорні',
-  price: '2500',
-  gender: 'female',
-  images: [
-    'https://i.ibb.co/rfNTYj7b/image.png', 
-    'https://i.ibb.co/whD7q7zV/image.png', 
-    'https://i.ibb.co/VpjDhLGb/image.png'
-  ],
-  description: 'класичні жіночі туфлі каблук 6 см,натур шкіра,натуральний підклад шевро'
-},
 
         function ProductCard({ product }) {
             const [currentImg, setCurrentImg] = useState(0);
