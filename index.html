@@ -11,7 +11,41 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #050505; color: white; scroll-behavior: smooth; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #050505;
+            /* Створюємо візерунок з символів +- */
+            background-image: 
+                radial-gradient(circle at center, rgba(26, 26, 26, 0.8) 0%, #050505 100%),
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            background-attachment: fixed;
+            color: white; 
+            scroll-behavior: smooth; 
+        }
+
+        /* Додаємо самі символи через псевдоелемент, щоб вони були по всьому фону */
+        body::before {
+            content: "+  -  +  -  +  -";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            font-size: 14px;
+            letter-spacing: 40px;
+            line-height: 40px;
+            color: rgba(255, 255, 255, 0.02); /* Дуже блідий білий, майже прозорий */
+            pointer-events: none;
+            z-index: -1;
+            padding: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+
         .nav-blur { background: rgba(5, 5, 5, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.1); }
         .product-card { background: #111; border: 1px solid #222; transition: all 0.3s ease; cursor: pointer; }
         .product-card:hover { border-color: #3b82f6; transform: translateY(-5px); box-shadow: 0 20px 40px rgba(59, 130, 246, 0.1); }
@@ -19,6 +53,9 @@
         .slider-btn:hover { background: #3b82f6; transform: scale(1.1); }
         .gradient-text { background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .modal-overlay { background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(8px); animation: fadeIn 0.3s ease; }
+        .smooth-img { backface-visibility: hidden; transform: translateZ(0); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
         
         /* Прискорення для плавних фото */
         .smooth-img { 
