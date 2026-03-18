@@ -90,7 +90,9 @@
         function Modal({ product, onClose }) {
             const [currentImg, setCurrentImg] = useState(0);
             const phone = "380673485909";
-            const viberUrl = `viber://chat?number=%2B${phone}&draft=${encodeURIComponent("Добрий день! Цікавить модель: " + product.name)}`;
+            const msg = encodeURIComponent("Добрий день! Цікавить модель: " + product.name);
+            const viberUrl = `viber://chat?number=%2B${phone}&draft=${msg}`;
+            const whatsappUrl = `https://wa.me/${phone}?text=${msg}`;
 
             useEffect(() => { document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = 'unset'; }; }, []);
 
@@ -112,12 +114,15 @@
                                 <h4 className="text-gray-400 uppercase text-xs font-bold tracking-widest mb-2">Опис моделі</h4>
                                 <p className="text-gray-300 leading-relaxed text-lg">{product.description}</p>
                             </div>
-                            <div className="space-y-4">
-                                <a href={viberUrl} className="w-full bg-[#7360f2] text-white py-4 rounded-2xl font-bold hover:bg-[#6251d4] transition-colors text-center flex items-center justify-center gap-3 text-lg">
-                                    <span>💬</span> Замовити у Viber
+                            <div className="space-y-3">
+                                <a href={viberUrl} className="w-full bg-[#7360f2] text-white py-3 rounded-2xl font-bold hover:bg-[#6251d4] transition-colors text-center flex items-center justify-center gap-2">
+                                    <span>💜</span> Viber
                                 </a>
-                                <a href={`tel:${phone}`} className="w-full bg-white text-black py-4 rounded-2xl font-bold hover:bg-gray-200 transition-colors text-center flex items-center justify-center gap-3 text-lg">
-                                    <span>📞</span> Швидкий дзвінок
+                                <a href={whatsappUrl} className="w-full bg-[#25D366] text-white py-3 rounded-2xl font-bold hover:bg-[#1ebd5b] transition-colors text-center flex items-center justify-center gap-2">
+                                    <span>🟢</span> WhatsApp
+                                </a>
+                                <a href={`tel:${phone}`} className="w-full bg-white text-black py-3 rounded-2xl font-bold hover:bg-gray-200 transition-colors text-center flex items-center justify-center gap-2">
+                                    <span>📞</span> Подзвонити
                                 </a>
                             </div>
                         </div>
@@ -130,6 +135,7 @@
             const [filter, setFilter] = useState('all');
             const [selectedProduct, setSelectedProduct] = useState(null);
             const filtered = INITIAL_PRODUCTS.filter(p => filter === 'all' || p.gender === filter);
+            const phone = "380673485909";
 
             return (
                 <div className="min-h-screen">
@@ -186,22 +192,26 @@
                             <div>
                                 <h2 className="text-5xl font-bold mb-8">Маєш питання? <br/><span className="text-blue-500">Ми на зв'язку.</span></h2>
                                 <div className="space-y-6">
-                                    <a href="tel:0673485909" className="flex items-center gap-4 text-2xl font-bold hover:text-blue-500 transition tracking-tight">
+                                    <a href={`tel:${phone}`} className="flex items-center gap-4 text-2xl font-bold hover:text-blue-500 transition tracking-tight">
                                         <span className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center">📞</span>
                                         067 348 59 09
                                     </a>
                                     <div className="pt-8">
                                         <h4 className="text-xl font-bold mb-6">Ми у соцмережах!</h4>
                                         <div className="flex flex-wrap gap-4">
-                                            <a href="viber://chat?number=%2B380673485909" className="p-4 rounded-2xl flex items-center gap-3 bg-white/5 hover:bg-blue-600/20 transition border border-white/5">
+                                            <a href={`viber://chat?number=%2B${phone}`} className="p-4 rounded-2xl flex items-center gap-3 bg-white/5 hover:bg-blue-600/20 transition border border-white/5">
                                                 <span className="text-2xl">💜</span>
                                                 <span className="text-sm font-bold uppercase tracking-widest text-gray-300">Viber</span>
+                                            </a>
+                                            <a href={`https://wa.me/${phone}`} target="_blank" className="p-4 rounded-2xl flex items-center gap-3 bg-white/5 hover:bg-green-600/20 transition border border-white/5">
+                                                <span className="text-2xl">🟢</span>
+                                                <span className="text-sm font-bold uppercase tracking-widest text-gray-300">WhatsApp</span>
                                             </a>
                                             <a href="https://t.me/Crozali" target="_blank" className="p-4 rounded-2xl flex items-center gap-3 bg-white/5 hover:bg-blue-600/20 transition border border-white/5">
                                                 <span className="text-2xl">✈️</span>
                                                 <span className="text-sm font-bold uppercase tracking-widest text-gray-300">Telegram</span>
                                             </a>
-                                            <a href="https://www.tiktok.com/@rom4ik45" target="_blank" className="p-4 rounded-2xl flex items-center gap-3 bg-white/5 hover:bg-blue-600/20 transition border border-white/5">
+                                            <a href="https://www.tiktok.com/@rom4ik45" target="_blank" className="p-4 rounded-2xl flex items-center gap-3 bg-white/5 hover:bg-red-600/20 transition border border-white/5">
                                                 <span className="text-2xl">🎵</span>
                                                 <span className="text-sm font-bold uppercase tracking-widest text-gray-300">TikTok</span>
                                             </a>
