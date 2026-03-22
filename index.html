@@ -3,92 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crozali | Admin Fix</title>
+    <title>Crozali | Premium Footwear</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; background-color: #020202; color: white; }
-        .nav-blur { background: rgba(2, 2, 2, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .product-card { background: #111; border: 1px solid #222; transition: 0.3s; }
-        .product-card:hover { border-color: #3b82f6; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020202; color: white; scroll-behavior: smooth; overflow-x: hidden; }
+        .chaos-bg { position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg width='150' height='150' viewBox='0 0 150 150' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='10' y='20' fill='rgba(255,255,255,0.05)' font-family='monospace' font-size='10'%3E+%3C/text%3E%3C/svg%3E"); z-index: -1; }
+        .nav-blur { background: rgba(2, 2, 2, 0.8); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .product-card { background: rgba(17, 17, 17, 0.6); border: 1px solid #222; transition: all 0.4s ease; backdrop-filter: blur(5px); }
+        .product-card:hover { border-color: #3b82f6; transform: translateY(-8px); shadow: 0 20px 40px rgba(59, 130, 246, 0.1); }
+        .slider-btn { background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); transition: 0.3s; }
+        .slider-btn:hover { background: #3b82f6; }
+        .gradient-text { background: linear-gradient(to right, #fff, #64748b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .modal-overlay { background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(12px); animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        input, textarea, select { background: #111 !important; border: 1px solid #333 !important; color: white !important; }
+        .admin-glow { border: 1px solid #3b82f6 !important; box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
     </style>
 </head>
 <body>
+    <div class="chaos-bg"></div>
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect } = React;
 
         const INITIAL_DATA = [
-            { id: '1', name: 'Чоловічі Монкі', gender: 'male', price: 3000, images: ['https://i.ibb.co/rWJwTzn/2026-03-17-154838389.png'], description: 'Класика та стиль.' },
-            { id: '2', name: 'Жіноча класика', gender: 'female', price: 2500, images: ['https://i.ibb.co/qYB5xSy5/image.png'], description: 'Масивна підошва.' }
+            { id: '1', name: 'Чоловічі Монкі', gender: 'male', price: 3000, images: ['https://i.ibb.co/rWJwTzn/2026-03-17-154838389.png', 'https://i.ibb.co/PZQZqMft/image.png'], description: 'Класичне чоловіче взуття преміальної якості.' },
+            { id: '2', name: 'Жіноча класика', gender: 'female', price: 2500, images: ['https://i.ibb.co/qYB5xSy5/image.png', 'https://i.ibb.co/xqV4vRJb/image.png'], description: 'Вишуканий стиль для справжніх леді.' },
+            { id: '3', name: 'Каблуки жіночі', gender: 'female', price: 2800, images: ['https://i.ibb.co/rfNTYj7b/image.png'], description: 'Класичні жіночі туфлі, натуральна шкіра.' }
         ];
+
+        function ProductCard({ product, onOpen, isAdmin, onDelete }) {
+            const [currentImg, setCurrentImg] = useState(0);
+            const next = (e) => { e.stopPropagation(); setCurrentImg(prev => (prev === product.images.length - 1 ? 0 : prev + 1)); };
+            const prev = (e) => { e.stopPropagation(); setCurrentImg(prev => (prev === 0 ? product.images.length - 1 : prev - 1)); };
+
+            return (
+                <div onClick={() => onOpen(product)} className={`product-card rounded-[32px] overflow-hidden flex flex-col h-full group cursor-pointer ${isAdmin ? 'admin-glow' : ''}`}>
+                    {isAdmin && (
+                        <button onClick={(e) => { e.stopPropagation(); onDelete(product.id); }} className="absolute top-4 right-4 z-20 bg-red-600/80 hover:bg-red-600 w-10 h-10 rounded-full flex items-center justify-center text-white transition">✕</button>
+                    )}
+                    <div className="relative h-80 overflow-hidden">
+                        <img src={product.images[currentImg]} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                        {product.images.length > 1 && (
+                            <div className="absolute inset-0 flex items-center justify-between px-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onClick={prev} className="slider-btn w-10 h-10 rounded-full flex items-center justify-center text-white">❮</button>
+                                <button onClick={next} className="slider-btn w-10 h-10 rounded-full flex items-center justify-center text-white">❯</button>
+                            </div>
+                        )}
+                    </div>
+                    <div className="p-8 flex flex-col flex-grow">
+                        <div className="flex justify-between items-start mb-4">
+                            <h3 className="text-xl font-bold leading-tight">{product.name}</h3>
+                            <span className="text-blue-500 font-extrabold text-xl whitespace-nowrap ml-4">{product.price} ₴</span>
+                        </div>
+                        <p className="text-gray-400 text-sm line-clamp-2 mb-6">{product.description}</p>
+                        <button className="mt-auto w-full py-3 rounded-xl border border-white/10 group-hover:bg-white group-hover:text-black transition-all font-bold text-xs uppercase tracking-widest">Детальніше</button>
+                    </div>
+                </div>
+            );
+        }
+
+        function Modal({ product, onClose }) {
+            const phone = "380673485909";
+            const msg = encodeURIComponent("Вітаю! Цікавить модель: " + product.name);
+            const [currentImg, setCurrentImg] = useState(0);
+
+            useEffect(() => { document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = 'unset'; }; }, []);
+
+            return (
+                <div className="fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-4 md:p-10" onClick={onClose}>
+                    <div className="bg-[#0a0a0a] w-full max-w-6xl max-h-full rounded-[40px] overflow-hidden flex flex-col md:flex-row relative border border-white/10 shadow-2xl" onClick={e => e.stopPropagation()}>
+                        <button onClick={onClose} className="absolute top-6 right-6 z-50 w-12 h-12 bg-white/5 hover:bg-red-500 rounded-full text-white flex items-center justify-center transition-all">✕</button>
+                        
+                        <div className="w-full md:w-3/5 h-[45vh] md:h-auto relative bg-zinc-900">
+                            <img src={product.images[currentImg]} className="w-full h-full object-contain" />
+                            {product.images.length > 1 && (
+                                <div className="absolute inset-0 flex items-center justify-between px-6">
+                                    <button onClick={() => setCurrentImg(prev => (prev === 0 ? product.images.length - 1 : prev - 1))} className="slider-btn w-14 h-14 rounded-full text-white flex items-center justify-center text-xl">❮</button>
+                                    <button onClick={() => setCurrentImg(prev => (prev === product.images.length - 1 ? 0 : prev + 1))} className="slider-btn w-14 h-14 rounded-full text-white flex items-center justify-center text-xl">❯</button>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="w-full md:w-2/5 p-10 flex flex-col overflow-y-auto">
+                            <span className="text-blue-500 font-bold text-xs uppercase tracking-[0.3em] mb-4">Original Collection</span>
+                            <h2 className="text-4xl font-extrabold mb-4">{product.name}</h2>
+                            <div className="text-3xl font-black text-white mb-8">{product.price} ₴</div>
+                            <p className="text-gray-400 leading-relaxed mb-10 text-lg">{product.description}</p>
+                            
+                            <div className="space-y-4 mt-auto">
+                                <p className="text-[10px] uppercase font-bold text-gray-500 tracking-widest text-center mb-2">Замовити через месенджер</p>
+                                <a href={`viber://chat?number=%2B${phone}&draft=${msg}`} className="w-full bg-[#7360f2] hover:bg-[#6251d1] py-5 rounded-2xl font-bold flex items-center justify-center transition-all shadow-lg shadow-purple-500/20">Viber</a>
+                                <a href={`https://wa.me/${phone}?text=${msg}`} className="w-full bg-[#25D366] hover:bg-[#20b858] py-5 rounded-2xl font-bold flex items-center justify-center transition-all shadow-lg shadow-green-500/20">WhatsApp</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
 
         function App() {
             const [products, setProducts] = useState(() => {
                 const saved = localStorage.getItem('crozali_db');
                 return saved ? JSON.parse(saved) : INITIAL_DATA;
             });
+            const [filter, setFilter] = useState('all');
+            const [selectedProduct, setSelectedProduct] = useState(null);
             const [isAdmin, setIsAdmin] = useState(false);
             const [showLogin, setShowLogin] = useState(false);
             const [pass, setPass] = useState('');
 
-            // Проста перевірка пароля
+            useEffect(() => { localStorage.setItem('crozali_db', JSON.stringify(products)); }, [products]);
+
             const handleLogin = () => {
                 if (pass === "653160") {
                     setIsAdmin(true);
                     setShowLogin(false);
                     setPass('');
                 } else {
-                    alert('Спробуйте пароль: 653160');
+                    alert('Невірний пароль!');
+                    setPass('');
                 }
             };
 
+            const filtered = products.filter(p => filter === 'all' || p.gender === filter);
+
             return (
-                <div className="min-h-screen p-10">
-                    <nav className="fixed top-0 left-0 w-full h-20 nav-blur flex items-center justify-between px-10 z-50">
-                        <h1 className="text-2xl font-black tracking-tighter">CROZALI</h1>
-                        {isAdmin && <span className="text-blue-500 font-bold text-xs uppercase">Режим Адміна</span>}
+                <div className="min-h-screen">
+                    <nav className="fixed top-0 w-full z-[80] nav-blur h-24 flex items-center px-6 md:px-12 justify-between">
+                        <div className="flex items-center gap-2">
+                            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center font-black italic">C</div>
+                            <span className="text-2xl font-black tracking-tighter">CROZALI</span>
+                        </div>
+                        <div className="flex gap-8 items-center">
+                            <div className="hidden md:flex gap-8 uppercase text-[11px] font-bold tracking-[0.2em] text-gray-400">
+                                <a href="#" className="hover:text-white transition">Каталог</a>
+                                <a href="#" className="hover:text-white transition">Про нас</a>
+                                <a href="#" className="hover:text-white transition">Контакти</a>
+                            </div>
+                            {isAdmin && <div className="px-4 py-1.5 border border-blue-500/50 rounded-full text-[10px] font-bold text-blue-500 uppercase tracking-widest">Admin Mode</div>}
+                        </div>
                     </nav>
 
-                    <div className="mt-32 grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {products.map(p => (
-                            <div key={p.id} className="product-card p-6 rounded-3xl relative">
-                                {isAdmin && (
-                                    <button 
-                                        onClick={() => setProducts(products.filter(item => item.id !== p.id))}
-                                        className="absolute top-4 right-4 bg-red-600 w-8 h-8 rounded-full"
-                                    >✕</button>
-                                )}
-                                <img src={p.images[0]} className="w-full h-48 object-cover rounded-2xl mb-4" />
-                                <h3 className="text-xl font-bold">{p.name}</h3>
-                                <p className="text-blue-500 font-bold text-lg">{p.price} ₴</p>
+                    <header className="pt-48 pb-32 px-6 text-center">
+                        <h1 className="text-7xl md:text-[120px] font-black mb-8 gradient-text leading-none tracking-tighter uppercase">Step into<br/>Luxury</h1>
+                        <p className="max-w-xl mx-auto text-gray-400 text-lg mb-12">Колекція взуття, що поєднує в собі витонченість класики та сміливість сучасного дизайну.</p>
+                        <a href="#catalog" className="inline-block bg-white text-black px-12 py-5 rounded-2xl font-black uppercase tracking-widest text-sm hover:scale-105 transition shadow-2xl">Переглянути каталог</a>
+                    </header>
+
+                    <main id="catalog" className="py-24 px-6 max-w-7xl mx-auto">
+                        <div className="flex flex-col md:flex-row justify-between items-center mb-20 gap-8">
+                            <h2 className="text-4xl font-extrabold uppercase tracking-tight">Каталог</h2>
+                            <div className="flex bg-white/5 p-1.5 rounded-[20px] border border-white/5">
+                                {['all', 'male', 'female'].map(t => (
+                                    <button key={t} onClick={() => setFilter(t)} className={`px-8 py-3 rounded-[15px] text-xs font-black uppercase tracking-widest transition-all ${filter === t ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}>
+                                        {t === 'all' ? 'Всі' : t === 'male' ? 'Чоловічі' : 'Жіночі'}
+                                    </button>
+                                ))}
                             </div>
-                        ))}
-                    </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                            {filtered.map(p => (
+                                <ProductCard 
+                                    key={p.id} 
+                                    product={p} 
+                                    isAdmin={isAdmin} 
+                                    onDelete={(id) => setProducts(products.filter(item => item.id !== id))} 
+                                    onOpen={setSelectedProduct} 
+                                />
+                            ))}
+                        </div>
+                    </main>
+
+                    {selectedProduct && <Modal product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
 
                     <button 
-                        onClick={() => isAdmin ? setIsAdmin(false) : setShowLogin(true)}
-                        className="fixed bottom-6 right-6 bg-white/10 px-6 py-3 rounded-xl text-xs font-bold"
+                        onClick={() => isAdmin ? setIsAdmin(false) : setShowLogin(true)} 
+                        className="fixed bottom-10 right-10 z-[90] bg-white/5 border border-white/10 p-5 rounded-[24px] text-[11px] font-black tracking-widest hover:bg-zinc-800 transition uppercase shadow-2xl"
                     >
-                        {isAdmin ? "ВИЙТИ" : "АДМІН"}
+                        {isAdmin ? "Вихід" : "Адмін панель"}
                     </button>
 
                     {showLogin && (
-                        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[100]">
-                            <div className="bg-[#111] p-10 rounded-[40px] border border-blue-500 w-80 text-center">
-                                <p className="mb-4 text-xs font-bold text-gray-400">ВВЕДІТЬ ПАРОЛЬ</p>
+                        <div className="fixed inset-0 bg-black/95 z-[200] flex items-center justify-center p-6 backdrop-blur-xl">
+                            <div className="bg-[#0a0a0a] p-12 rounded-[48px] border border-blue-500/30 w-full max-w-sm text-center shadow-2xl">
+                                <div className="w-16 h-16 bg-blue-600 rounded-2xl mx-auto mb-8 flex items-center justify-center text-2xl">🔒</div>
+                                <h3 className="text-white font-black uppercase tracking-widest mb-2 text-xl">Авторизація</h3>
+                                <p className="text-gray-500 text-sm mb-8">Введіть пароль адміністратора</p>
                                 <input 
                                     type="password" 
-                                    className="w-full p-4 bg-black border border-gray-800 rounded-2xl mb-4 text-center" 
-                                    value={pass}
-                                    onChange={e => setPass(e.target.value)}
-                                    onKeyDown={e => e.key === 'Enter' && handleLogin()}
+                                    autoFocus 
+                                    className="w-full p-5 rounded-2xl mb-4 text-center text-xl font-bold tracking-widest" 
+                                    value={pass} 
+                                    onChange={e => setPass(e.target.value)} 
+                                    onKeyDown={e => e.key === 'Enter' && handleLogin()} 
                                 />
-                                <button onClick={handleLogin} className="w-full bg-blue-600 py-4 rounded-2xl font-bold">УВІЙТИ</button>
-                                <button onClick={() => setShowLogin(false)} className="mt-4 text-[10px] text-gray-500">СКАСУВАТИ</button>
+                                <button onClick={handleLogin} className="w-full bg-blue-600 py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition">Увійти</button>
+                                <button onClick={() => setShowLogin(false)} className="mt-6 text-gray-600 text-[10px] uppercase font-bold tracking-widest hover:text-white transition">Скасувати</button>
                             </div>
                         </div>
                     )}
