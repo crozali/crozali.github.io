@@ -19,7 +19,7 @@
         .product-card { background: rgba(17, 17, 17, 0.85); border: 1px solid #222; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; backdrop-filter: blur(4px); }
         .product-card:hover { border-color: #3b82f6; transform: translateY(-5px); box-shadow: 0 20px 40px rgba(59, 130, 246, 0.1); }
         .slider-btn { background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); transition: 0.3s; }
-        .slider-btn:hover { background: #3b82f6; color: white; }
+        .slider-btn:hover { background: #3b82f6; }
         .indicator-dot { height: 4px; border-radius: 2px; transition: all 0.3s ease; background: rgba(255,255,255,0.3); }
         .indicator-active { width: 24px; background: #3b82f6; }
         .indicator-inactive { width: 6px; }
@@ -36,7 +36,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useCallback } = React;
+        const { useState, useEffect } = React;
 
         const firebaseConfig = {
             apiKey: "AIzaSyBSmzapB-gtDeQNVq-m7GuJP0XF2_94aU",
@@ -47,36 +47,13 @@
             messagingSenderId: "50262512045",
             appId: "1:50262512045:web:a996b63a47480abd941124"
         };
-        // Ініціалізація Firebase (Compat version)
         firebase.initializeApp(firebaseConfig);
-        
-        // Отримуємо посилання на базу даних через простір імен firebase
         const db = firebase.database();
 
         function ProductCard({ product, onOpen, isAdmin, onDelete }) {
             const [currentImg, setCurrentImg] = useState(0);
-            
-            // Запобігаємо відкриттю модалки при кліку на стрілки
-            const next = (e) => { 
-                e.stopPropagation(); 
-                setCurrentImg(prev => (prev === product.images.length - 1 ? 0 : prev + 1)); 
-            };
-            
-            const prev = (e) => { 
-                e.stopPropagation(); 
-                setCurrentImg(prev => (prev === 0 ? product.images.length - 1 : prev - 1)); 
-            };
-            const next = (e) => { 
-                e.stopPropagation(); 
-                e.preventDefault();
-                setCurrentImg(prev => (prev === product.images.length - 1 ? 0 : prev + 1)); 
-            };
-            
-            const prev = (e) => { 
-                e.stopPropagation(); 
-                e.preventDefault();
-                setCurrentImg(prev => (prev === 0 ? product.images.length - 1 : prev - 1)); 
-            };
+            const next = (e) => { e.stopPropagation(); setCurrentImg(prev => (prev === product.images.length - 1 ? 0 : prev + 1)); };
+            const prev = (e) => { e.stopPropagation(); setCurrentImg(prev => (prev === 0 ? product.images.length - 1 : prev - 1)); };
 
             return (
                 <div onClick={() => onOpen(product)} className="product-card rounded-3xl overflow-hidden flex flex-col h-full group relative">
@@ -84,11 +61,7 @@
                         <button onClick={(e) => { e.stopPropagation(); onDelete(product.id); }} className="absolute top-4 right-4 z-[60] bg-red-600 w-8 h-8 rounded-full flex items-center justify-center font-bold hover:scale-110 transition">✕</button>
                     )}
                     <div className="relative h-72 overflow-hidden bg-black/40">
-                        <img 
-                            src={product.images[currentImg]} 
-                            loading="lazy"
-                            className="w-full h-full object-cover transition-opacity duration-300" 
-                        />
+                        <img src={product.images[currentImg]} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                         <div className="absolute inset-0 flex items-center justify-between px-4 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button onClick={prev} className="slider-btn w-10 h-10 rounded-full text-white flex items-center justify-center">❮</button>
                             <button onClick={next} className="slider-btn w-10 h-10 rounded-full text-white flex items-center justify-center">❯</button>
@@ -118,10 +91,7 @@
             const viberUrl = `viber://chat?number=%2B${phone}`;
             const whatsappUrl = `https://wa.me/${phone}?text=${msg}`;
 
-            useEffect(() => { 
-                document.body.style.overflow = 'hidden'; 
-                return () => { document.body.style.overflow = 'unset'; }; 
-            }, []);
+            useEffect(() => { document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = 'unset'; }; }, []);
 
             return (
                 <div className="fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-4 md:p-8" onClick={onClose}>
@@ -142,13 +112,13 @@
                         <div className="w-full md:w-2/5 p-8 flex flex-col overflow-y-auto">
                             <h2 className="text-3xl font-bold mb-4">{product.name}</h2>
                             <div className="text-3xl font-extrabold text-blue-500 mb-6">{product.price} ₴</div>
-                            <div className="mb-8 flex-grow">
+                            <div className="mb-8 flex-grow text-center md:text-left">
                                 <h4 className="text-gray-400 uppercase text-xs font-bold tracking-widest mb-2">Опис моделі</h4>
                                 <p className="text-gray-300 leading-relaxed text-lg">{product.description}</p>
                             </div>
                             <div className="space-y-3">
                                 <a href={viberUrl} className="w-full bg-[#7360f2] text-white py-3 rounded-2xl font-bold hover:bg-[#6251d4] transition-colors text-center flex items-center justify-center gap-2"><span>💜</span> Viber</a>
-                                <a href={whatsappUrl} target="_blank" className="w-full bg-[#25D366] text-white py-3 rounded-2xl font-bold hover:bg-[#1ebd5b] transition-colors text-center flex items-center justify-center gap-2"><span>🟢</span> WhatsApp</a>
+                                <a href={whatsappUrl} className="w-full bg-[#25D366] text-white py-3 rounded-2xl font-bold hover:bg-[#1ebd5b] transition-colors text-center flex items-center justify-center gap-2"><span>🟢</span> WhatsApp</a>
                                 <a href={`tel:${phone}`} className="w-full bg-white text-black py-3 rounded-2xl font-bold hover:bg-gray-200 transition-colors text-center flex items-center justify-center gap-2"><span>📞</span> Подзвонити</a>
                             </div>
                         </div>
@@ -167,20 +137,22 @@
             const [showLogin, setShowLogin] = useState(false);
             const [newItem, setNewItem] = useState({ name: '', price: '', description: '', img1: '', img2: '', img3: '', gender: 'male' });
 
+            const phone = "380673485909";
+
             useEffect(() => {
                 const productsRef = db.ref('products');
                 productsRef.on('value', (snapshot) => {
                     const data = snapshot.val();
                     if (data) {
                         const list = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-                        setProducts(list.reverse()); // Нові товари зверху
+                        setProducts(list);
                     } else { setProducts([]); }
                 });
             }, []);
 
             const handleAddProduct = () => {
                 const images = [newItem.img1, newItem.img2, newItem.img3].filter(url => url !== '');
-                if (!newItem.name || !newItem.price || images.length === 0) return alert("Заповніть дані!");
+                if (!newItem.name || !newItem.price || images.length === 0) return alert("Заповніть назву, ціну та хоча б одне фото!");
                 db.ref('products').push({
                     name: newItem.name,
                     price: newItem.price,
@@ -217,7 +189,7 @@
                     <section id="catalog" className="py-24 px-6 max-w-6xl mx-auto">
                         <div className="flex flex-col items-center text-center mb-16 gap-8">
                             <div>
-                                <h2 className="text-4xl font-bold mb-2">Наш каталог</h2>
+                                <h2 className="text-4xl font-bold mb-2 text-center">Наш каталог</h2>
                                 <p className="text-gray-500 tracking-wide uppercase text-xs font-bold">Обирай свою ідеальну пару</p>
                             </div>
                             <div className="flex flex-wrap justify-center bg-[#111] p-1.5 rounded-2xl border border-white/5">
@@ -254,11 +226,13 @@
                                         <span className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center">📞</span>
                                         067 348 59 09
                                     </a>
+                                    
+                                    {/* БЛОК СОЦМЕРЕЖ */}
                                     <div className="flex flex-wrap justify-center md:justify-start gap-4">
-                                        <a href={`viber://chat?number=%2B${phone}`} className="social-icon w-14 h-14 rounded-2xl flex items-center justify-center text-2xl">💜</a>
-                                        <a href={`https://wa.me/${phone}`} target="_blank" className="social-icon w-14 h-14 rounded-2xl flex items-center justify-center text-2xl">🟢</a>
-                                        <a href="https://t.me/crozali" target="_blank" className="social-icon w-14 h-14 rounded-2xl flex items-center justify-center text-2xl">🔵</a>
-                                        <a href="https://www.tiktok.com/@rom4ik45" target="_blank" className="social-icon w-14 h-14 rounded-2xl flex items-center justify-center text-2xl">📱</a>
+                                        <a href={`viber://chat?number=%2B${phone}`} title="Viber" className="social-icon w-14 h-14 rounded-2xl flex items-center justify-center text-2xl">💜</a>
+                                        <a href={`https://wa.me/${phone}`} target="_blank" title="WhatsApp" className="social-icon w-14 h-14 rounded-2xl flex items-center justify-center text-2xl">🟢</a>
+                                        <a href="https://t.me/crozali" target="_blank" title="Telegram" className="social-icon w-14 h-14 rounded-2xl flex items-center justify-center text-2xl">🔵</a>
+                                        <a href="https://www.tiktok.com/@rom4ik45" target="_blank" title="TikTok" className="social-icon w-14 h-14 rounded-2xl flex items-center justify-center text-2xl">📱</a>
                                     </div>
                                 </div>
                             </div>
@@ -275,21 +249,13 @@
                         </div>
                     </footer>
 
-                    {/* Кнопка Вгору */}
-                    <button 
-                        onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}
-                        className="fixed bottom-6 left-6 z-[100] bg-blue-600/20 hover:bg-blue-600 p-4 rounded-full border border-blue-500/30 transition-all group"
-                    >
-                        <span className="text-xl group-hover:-translate-y-1 block transition-transform">↑</span>
-                    </button>
-
                     <button onClick={() => isAdmin ? setIsAdmin(false) : setShowLogin(true)} className="fixed bottom-6 right-6 z-[100] bg-white/5 p-4 rounded-full text-[10px] uppercase font-bold border border-white/10 hover:bg-blue-600 transition">
                         {isAdmin ? 'Вийти' : 'Admin'}
                     </button>
 
                     {showLogin && (
-                        <div className="fixed inset-0 z-[300] bg-black/90 flex items-center justify-center p-6" onClick={() => setShowLogin(false)}>
-                            <div className="bg-[#111] p-8 rounded-3xl border border-blue-500 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+                        <div className="fixed inset-0 z-[300] bg-black/90 flex items-center justify-center p-6">
+                            <div className="bg-[#111] p-8 rounded-3xl border border-blue-500 w-full max-w-sm">
                                 <h2 className="text-xl font-bold mb-4">Вхід в адмін-панель</h2>
                                 <input type="password" placeholder="Пароль" className="admin-input" value={loginPass} onChange={e => setLoginPass(e.target.value)} />
                                 <button onClick={() => { if(loginPass === '653160') { setIsAdmin(true); setShowLogin(false); setLoginPass(''); } else { alert('Невірний пароль'); } }} className="w-full bg-blue-600 py-3 rounded-xl font-bold">Увійти</button>
@@ -302,13 +268,13 @@
                         <div className="fixed inset-0 z-[300] bg-black/95 flex items-center justify-center p-4 overflow-y-auto">
                             <div className="bg-[#111] p-8 rounded-3xl border border-white/10 w-full max-w-lg">
                                 <h2 className="text-2xl font-bold mb-6 text-blue-500 uppercase">Додати модель</h2>
-                                <input placeholder="Назва моделі" className="admin-input" value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} />
-                                <input placeholder="Ціна" type="number" className="admin-input" value={newItem.price} onChange={e => setNewItem({...newItem, price: e.target.value})} />
-                                <textarea placeholder="Опис" className="admin-input h-24" value={newItem.description} onChange={e => setNewItem({...newItem, description: e.target.value})} />
-                                <input placeholder="URL Фото 1" className="admin-input" value={newItem.img1} onChange={e => setNewItem({...newItem, img1: e.target.value})} />
-                                <input placeholder="URL Фото 2" className="admin-input" value={newItem.img2} onChange={e => setNewItem({...newItem, img2: e.target.value})} />
-                                <input placeholder="URL Фото 3" className="admin-input" value={newItem.img3} onChange={e => setNewItem({...newItem, img3: e.target.value})} />
-                                <select className="admin-input" value={newItem.gender} onChange={e => setNewItem({...newItem, gender: e.target.value})}>
+                                <input placeholder="Назва моделі" className="admin-input" onChange={e => setNewItem({...newItem, name: e.target.value})} />
+                                <input placeholder="Ціна (тільки цифри)" type="number" className="admin-input" onChange={e => setNewItem({...newItem, price: e.target.value})} />
+                                <textarea placeholder="Опис" className="admin-input h-24" onChange={e => setNewItem({...newItem, description: e.target.value})} />
+                                <input placeholder="URL Фото 1" className="admin-input" onChange={e => setNewItem({...newItem, img1: e.target.value})} />
+                                <input placeholder="URL Фото 2" className="admin-input" onChange={e => setNewItem({...newItem, img2: e.target.value})} />
+                                <input placeholder="URL Фото 3" className="admin-input" onChange={e => setNewItem({...newItem, img3: e.target.value})} />
+                                <select className="admin-input" onChange={e => setNewItem({...newItem, gender: e.target.value})}>
                                     <option value="male">Чоловіче</option>
                                     <option value="female">Жіноче</option>
                                 </select>
