@@ -100,6 +100,7 @@
                 };
                 db.ref('products').push(data);
                 setShowAdd(false);
+                setNewItem({ name: '', price: '', desc: '', img1: '', gender: 'male' });
             };
 
             const filtered = products.filter(p => filter === 'all' || p.gender === filter);
@@ -117,21 +118,22 @@
                     </nav>
 
                     <header className="pt-48 pb-24 text-center px-6">
-                        <h1 className="text-6xl md:text-8xl font-extrabold mb-6 uppercase tracking-tighter leading-none">Step Into <br/><span className="text-blue-500 italic">Future</span></h1>
+                        <h1 className="text-6xl md:text-8xl font-extrabold mb-6 uppercase tracking-tighter leading-none">Step Into <br/><span className="text-blue-500 italic text-5xl md:text-7xl">Future</span></h1>
                     </header>
 
-                    {/* СЕКЦІЯ ПРО НАС */}
-                    <section id="about" className="py-24 px-6 max-w-4xl mx-auto text-center">
+                    {/* ОНОВЛЕНА СЕКЦІЯ ПРО НАС */}
+                    <section id="about" className="py-24 px-6 max-w-4xl mx-auto text-center border-t border-white/5">
                         <h2 className="text-4xl font-bold mb-8 uppercase tracking-tighter text-blue-500">Про нас</h2>
-                        <p className="text-xl text-gray-300 leading-relaxed font-medium">
-                            Crozali — це більше ніж магазин. Це твій стиль, твоя впевненість і твій комфорт у кожному кроці. Ми обираємо лише найкраще взуття для тих, хто цінує якість.
-                        </p>
+                        <div className="text-xl text-gray-300 leading-relaxed font-medium space-y-4">
+                            <p>Понад 8 років ми робимо нашим клієнтам шкіряне взуття, яке поєднує в собі стиль та комфорт.</p>
+                            <p>Наша місія — зробити найкраще шкіряне взуття з гарантією якості. Також робимо взуття на замовлення.</p>
+                        </div>
                     </section>
 
                     <section id="catalog" className="py-24 px-6 max-w-6xl mx-auto border-t border-white/5">
                         <div className="flex justify-center mb-12 gap-4">
                             {['all', 'male', 'female'].map(t => (
-                                <button key={t} onClick={() => setFilter(t)} className={`px-6 py-2 rounded-xl text-xs font-bold uppercase transition ${filter === t ? 'bg-blue-600' : 'bg-[#111]'}`}>
+                                <button key={t} onClick={() => setFilter(t)} className={`px-6 py-2 rounded-xl text-xs font-bold uppercase transition ${filter === t ? 'bg-blue-600 shadow-[0_0_15px_rgba(59,130,246,0.5)]' : 'bg-[#111]'}`}>
                                     {t === 'all' ? 'Всі' : t === 'male' ? 'Чоловічі' : 'Жіночі'}
                                 </button>
                             ))}
@@ -146,16 +148,16 @@
                             <div className="text-center md:text-left">
                                 <h2 className="text-5xl font-bold mb-8 uppercase tracking-tighter text-blue-500">Ми на зв'язку.</h2>
                                 <div className="space-y-6">
-                                    <a href={`tel:${phone}`} className="flex items-center justify-center md:justify-start gap-4 text-2xl font-bold hover:text-blue-500 transition">📞 067 348 59 09</a>
+                                    <a href={`tel:${phone}`} className="flex items-center justify-center md:justify-start gap-4 text-2xl font-bold hover:text-blue-500 transition tracking-tighter">📞 067 348 59 09</a>
                                     <div className="flex justify-center md:justify-start gap-4 pt-4">
-                                        <a href="https://viber.click/380673485909" className="w-12 h-12 bg-[#7360f2]/10 rounded-full flex items-center justify-center font-bold">V</a>
-                                        <a href="https://t.me/crozali" className="w-12 h-12 bg-[#0088cc]/10 rounded-full flex items-center justify-center font-bold">T</a>
-                                        <a href="https://tiktok.com/@crozali" className="px-4 h-12 bg-white/10 rounded-full flex items-center justify-center font-bold text-[10px] uppercase tracking-tighter">TikTok</a>
+                                        <a href="https://viber.click/380673485909" className="w-12 h-12 bg-[#7360f2]/10 rounded-full flex items-center justify-center font-bold border border-[#7360f2]/20">V</a>
+                                        <a href="https://t.me/crozali" className="w-12 h-12 bg-[#0088cc]/10 rounded-full flex items-center justify-center font-bold border border-[#0088cc]/20">T</a>
+                                        <a href="https://tiktok.com/@crozali" className="px-5 h-12 bg-white/5 rounded-full flex items-center justify-center font-bold text-[10px] uppercase tracking-tighter border border-white/10 hover:bg-white hover:text-black transition-all">TikTok</a>
                                     </div>
                                 </div>
                             </div>
-                            <div className="bg-[#111] p-10 rounded-[40px] border border-white/5 text-center">
-                                <h3 className="text-xl font-bold mb-4 uppercase text-blue-500 font-black">Графік роботи</h3>
+                            <div className="bg-[#111] p-10 rounded-[40px] border border-white/5 text-center shadow-2xl shadow-blue-500/5">
+                                <h3 className="text-xl font-bold mb-4 uppercase text-blue-500 font-black tracking-widest">Графік роботи</h3>
                                 <p className="text-gray-400 font-bold italic">Пн-Пт: 10:00 — 18:00</p>
                                 <p className="text-gray-400 font-bold italic">Сб-Нд: 11:00 — 18:00</p>
                             </div>
@@ -175,16 +177,15 @@
 
                     {showAdd && (
                         <div className="fixed inset-0 bg-black/95 z-[200] flex items-center justify-center p-6 overflow-y-auto">
-                            <div className="bg-[#111] p-10 rounded-[40px] border border-white/10 w-full max-w-md space-y-4">
+                            <div className="bg-[#111] p-10 rounded-[40px] border border-white/10 w-full max-w-md space-y-4 shadow-2xl shadow-blue-500/10">
                                 <h2 className="text-2xl font-black mb-6 text-center text-blue-500 uppercase tracking-widest">Новий товар</h2>
                                 <input placeholder="Назва" className="w-full" onChange={e => setNewItem({...newItem, name: e.target.value})} />
                                 <input placeholder="Ціна" type="number" className="w-full" onChange={e => setNewItem({...newItem, price: e.target.value})} />
                                 <textarea placeholder="Опис" className="w-full h-24" onChange={e => setNewItem({...newItem, desc: e.target.value})} />
                                 <input placeholder="URL фото" className="w-full" onChange={e => setNewItem({...newItem, img1: e.target.value})} />
                                 <div className="flex gap-4 pt-4">
-                                    <button onClick={addProduct} className="flex-1 bg-blue-600 py-4 rounded-2xl font-black">ЗБЕРЕГТИ</button>
-                                    <button onClick={() => setShowAdd(false)} className="flex-1 bg-zinc-800 py-4 rounded-2xl font-black">СКАСУВАТИ</button>
-                                }
+                                    <button onClick={addProduct} className="flex-1 bg-blue-600 py-4 rounded-2xl font-black transition hover:scale-105 active:scale-95">ЗБЕРЕГТИ</button>
+                                    <button onClick={() => setShowAdd(false)} className="flex-1 bg-zinc-800 py-4 rounded-2xl font-black transition hover:bg-zinc-700">СКАСУВАТИ</button>
                                 </div>
                             </div>
                         </div>
