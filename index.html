@@ -38,13 +38,16 @@
         const { useState, useEffect } = React;
 
         // Конфігурація Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyBSmzapB-gtDeQNVq-m7GuJP0XF2_94aU",
-            authDomain: "crozali-shop.firebaseapp.com",
-            projectId: "crozali-shop",
-            storageBucket: "crozali-shop.firebasestorage.app",
-            messagingSenderId: "50262512045",
-            appId: "1:50262512045:web:a996b63a47480abd941124"
+       // Конфігурація Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyBSmzapB-gtDeQNVq-m7GuJP0XF2_94aU",
+    authDomain: "crozali-shop.firebaseapp.com",
+    // ЦЬОГО РЯДКА НЕ ВИСТАЧАЛО:
+    databaseURL: "https://crozali-shop-default-rtdb.europe-west1.firebasedatabase.app", 
+    projectId: "crozali-shop",
+    storageBucket: "crozali-shop.firebasestorage.app",
+    messagingSenderId: "50262512045",
+    appId: "1:50262512045:web:a996b63a47480abd941124"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
