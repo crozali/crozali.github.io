@@ -3,27 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crozali | Admin Mode</title>
+    <title>Crozali | Premium Store & Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020202; color: white; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020202; color: white; scroll-behavior: smooth; }
         .nav-blur { background: rgba(2, 2, 2, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .product-card { background: rgba(17, 17, 17, 0.85); border: 1px solid #222; position: relative; transition: 0.3s; }
-        .admin-panel-active { border: 1px dashed #3b82f6; animation: pulse border 2s infinite; }
-        @keyframes pulse { 0% { border-color: #3b82f6; } 50% { border-color: #1d4ed8; } 100% { border-color: #3b82f6; } }
+        .product-card { background: rgba(17, 17, 17, 0.85); border: 1px solid #222; transition: 0.4s; position: relative; }
+        .admin-glow { border: 1px solid #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
+        .indicator-dot { height: 4px; border-radius: 2px; transition: 0.3s; background: rgba(255,255,255,0.2); }
+        .indicator-active { width: 24px; background: #3b82f6; }
+        input, select, textarea { background: #000 !important; border: 1px solid #333 !important; color: white !important; }
+        input:focus { border-color: #3b82f6 !important; }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState } = React;
+        const { useState, useEffect } = React;
 
-        const INITIAL_DATA = [
+        const DEFAULT_PRODUCTS = [
             { id: 1, name: 'Чоловічі Монкі', gender: 'male', price: 3000, images: ['https://i.ibb.co/rWJwTzn/2026-03-17-154838389.png'], description: 'Класика.' },
             { id: 2, name: 'Жіноча класика', gender: 'female', price: 2500, images: ['https://i.ibb.co/qYB5xSy5/image.png'], description: 'Масивна підошва.' },
             { id: 3, name: 'Туфлі жіночі чорні', gender: 'female', price: 2800, images: ['https://i.ibb.co/rfNTYj7b/image.png'], description: 'Натур шкіра.' },
@@ -35,87 +38,140 @@
         ];
 
         function App() {
-            const [products, setProducts] = useState(INITIAL_DATA);
+            // Завантаження даних з пам'яті браузера або дефолтні
+            const [products, setProducts] = useState(() => {
+                const saved = localStorage.getItem('crozali_products');
+                return saved ? JSON.parse(saved) : DEFAULT_PRODUCTS;
+            });
+
             const [isAdmin, setIsAdmin] = useState(false);
             const [showLogin, setShowLogin] = useState(false);
+            const [showAddForm, setShowAddForm] = useState(false);
             const [pass, setPass] = useState('');
+            const [filter, setFilter] = useState('all');
 
-            // Функції Адміна
+            // Нова форма товару
+            const [newP, setNewP] = useState({ name: '', price: '', img: '', gender: 'male', desc: '' });
+
+            // Збереження в пам'ять при кожній зміні
+            useEffect(() => {
+                localStorage.setItem('crozali_products', JSON.stringify(products));
+            }, [products]);
+
             const deleteProduct = (id) => {
-                if(confirm("Видалити цей товар з вітрини?")) {
+                if(confirm("Видалити цей товар назавжди?")) {
                     setProducts(products.filter(p => p.id !== id));
                 }
             };
 
-            const editPrice = (id) => {
-                const p = prompt("Введіть нову ціну (тільки цифри):");
-                if (p) setProducts(products.map(item => item.id === id ? {...item, price: p} : item));
+            const handleAddProduct = (e) => {
+                e.preventDefault();
+                const item = {
+                    id: Date.now(),
+                    name: newP.name,
+                    price: parseInt(newP.price),
+                    images: [newP.img || 'https://via.placeholder.com/400'],
+                    gender: newP.gender,
+                    description: newP.desc
+                };
+                setProducts([item, ...products]);
+                setShowAddForm(false);
+                setNewP({ name: '', price: '', img: '', gender: 'male', desc: '' });
             };
 
-            const addProduct = () => {
-                const name = prompt("Назва взуття:");
-                const price = prompt("Ціна:");
-                const img = prompt("Посилання на фото (URL):", "https://i.ibb.co/...");
-                if (name && price && img) {
-                    const newProd = { id: Date.now(), name, price, images: [img], gender: 'male', description: 'Нова модель' };
-                    setProducts([newProd, ...products]);
-                }
-            };
+            const filtered = products.filter(p => filter === 'all' || p.gender === filter);
 
             return (
                 <div className="min-h-screen pb-20">
-                    <nav className="fixed top-0 w-full z-50 nav-blur h-20 flex items-center justify-between px-10">
+                    {/* Навігація */}
+                    <nav className="fixed top-0 w-full z-50 nav-blur h-20 flex items-center justify-between px-6 md:px-20">
                         <span className="text-2xl font-black tracking-tighter">CROZALI</span>
-                        {isAdmin && (
-                            <div className="bg-blue-600 px-4 py-2 rounded-full flex items-center gap-4 animate-pulse">
-                                <span className="text-[10px] font-bold uppercase">Admin Active</span>
-                                <button onClick={addProduct} className="bg-white text-blue-600 px-3 py-1 rounded-lg font-bold text-xs hover:scale-105 transition"> + ДОДАТИ ТОВАР</button>
+                        <div className="flex gap-6 items-center">
+                            <div className="hidden md:flex gap-4">
+                                {['all', 'male', 'female'].map(t => (
+                                    <button key={t} onClick={() => setFilter(t)} className={`text-[10px] font-bold uppercase tracking-widest ${filter === t ? 'text-blue-500' : 'text-gray-400'}`}>
+                                        {t === 'all' ? 'Всі' : t === 'male' ? 'Чоловічі' : 'Жіночі'}
+                                    </button>
+                                ))}
                             </div>
-                        )}
+                            {isAdmin && (
+                                <button onClick={() => setShowAddForm(true)} className="bg-blue-600 text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase hover:bg-blue-500 transition shadow-lg shadow-blue-600/20">
+                                    + Додати товар
+                                </button>
+                            )}
+                        </div>
                     </nav>
 
+                    {/* Каталог */}
                     <div className="pt-32 max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {products.map(p => (
-                            <div key={p.id} className={`product-card rounded-3xl overflow-hidden p-4 ${isAdmin ? 'admin-panel-active' : ''}`}>
-                                
-                                {/* КНОПКИ КЕРУВАННЯ (Тільки для адміна) */}
+                        {filtered.map(p => (
+                            <div key={p.id} className={`product-card rounded-[32px] overflow-hidden p-4 ${isAdmin ? 'admin-glow' : ''}`}>
                                 {isAdmin && (
-                                    <div className="absolute top-6 right-6 z-10 flex gap-2">
-                                        <button onClick={() => editPrice(p.id)} title="Змінити ціну" className="bg-blue-500 w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-xl hover:bg-blue-400">✎</button>
-                                        <button onClick={() => deleteProduct(p.id)} title="Видалити" className="bg-red-600 w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-xl hover:bg-red-500">✕</button>
-                                    </div>
+                                    <button onClick={() => deleteProduct(p.id)} className="absolute top-6 right-6 z-10 bg-red-600/80 hover:bg-red-600 w-8 h-8 rounded-full flex items-center justify-center text-xs">✕</button>
                                 )}
-
-                                <img src={p.images[0]} className="w-full h-64 object-cover rounded-2xl mb-4 bg-zinc-900" />
+                                <div className="h-64 rounded-2xl overflow-hidden mb-4 bg-zinc-900">
+                                    <img src={p.images[0]} className="w-full h-full object-cover" />
+                                </div>
                                 <h3 className="font-bold text-lg mb-1">{p.name}</h3>
                                 <div className="flex justify-between items-center">
                                     <p className="text-blue-500 font-black text-xl">{p.price} ₴</p>
-                                    <span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">{p.gender}</span>
+                                    <span className="text-[9px] bg-white/5 px-2 py-1 rounded text-gray-400 uppercase font-bold tracking-widest">{p.gender}</span>
                                 </div>
                             </div>
                         ))}
                     </div>
 
-                    {/* Кнопка входу */}
-                    <button onClick={() => isAdmin ? setIsAdmin(false) : setShowLogin(true)} className="fixed bottom-6 right-6 z-50 bg-zinc-900 border border-white/10 px-4 py-3 rounded-2xl text-[10px] font-bold hover:bg-zinc-800 transition">
-                        {isAdmin ? "ВИЙТИ З АДМІНКИ" : "🔑 УВІЙТИ ЯК АДМІН"}
+                    {/* Кнопка Адміна */}
+                    <button onClick={() => isAdmin ? setIsAdmin(false) : setShowLogin(true)} className="fixed bottom-6 right-6 z-50 bg-zinc-900/80 backdrop-blur border border-white/10 px-5 py-3 rounded-2xl text-[10px] font-bold hover:bg-zinc-800 transition">
+                        {isAdmin ? "ВИЙТИ З АДМІНКИ" : "🔑 АДМІН"}
                     </button>
 
-                    {/* Модалка пароля */}
+                    {/* Модалка входу */}
                     {showLogin && (
-                        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[100] backdrop-blur-sm">
+                        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[100] backdrop-blur-md">
                             <div className="bg-zinc-900 p-8 rounded-[40px] border border-blue-500/30 w-80 text-center">
-                                <h3 className="text-blue-500 font-bold uppercase text-xs tracking-[0.2em] mb-6">Доступ обмежено</h3>
-                                <input 
-                                    type="password" 
-                                    placeholder="Пароль..." 
-                                    className="w-full bg-black border border-white/10 p-4 rounded-2xl mb-4 outline-none focus:border-blue-500 text-center"
-                                    value={pass}
-                                    onChange={e => setPass(e.target.value)}
-                                    autoFocus
-                                />
-                                <button onClick={() => { if(pass === "1234") { setIsAdmin(true); setShowLogin(false); setPass(''); } else alert('Wrong!') }} className="w-full bg-blue-600 py-4 rounded-2xl font-bold hover:bg-blue-500 transition">УВІЙТИ</button>
+                                <h3 className="text-blue-500 font-bold uppercase text-xs tracking-widest mb-6">Вхід в адмін-панель</h3>
+                                <input type="password" placeholder="Пароль..." className="w-full p-4 rounded-2xl mb-4 text-center outline-none" value={pass} onChange={e => setPass(e.target.value)} autoFocus />
+                                <button onClick={() => { if(pass === "1234") { setIsAdmin(true); setShowLogin(false); setPass(''); } else alert('Невірно!') }} className="w-full bg-blue-600 py-4 rounded-2xl font-bold">УВІЙТИ</button>
                                 <button onClick={() => setShowLogin(false)} className="mt-4 text-zinc-500 text-[10px] uppercase font-bold">Закрити</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ФОРМА ДОДАВАННЯ ТОВАРУ */}
+                    {showAddForm && (
+                        <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-[110] p-4 overflow-y-auto">
+                            <div className="bg-zinc-900 w-full max-w-md p-8 rounded-[40px] border border-white/10 relative">
+                                <button onClick={() => setShowAddForm(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white">✕</button>
+                                <h2 className="text-2xl font-bold mb-6 text-blue-500">Нова пара взуття</h2>
+                                <form onSubmit={handleAddProduct} className="space-y-4">
+                                    <div>
+                                        <label className="text-[10px] uppercase font-bold text-gray-500 ml-2">Назва моделі</label>
+                                        <input required className="w-full p-4 rounded-2xl mt-1 outline-none" placeholder="Напр: Кеди Crozali White" value={newP.name} onChange={e => setNewP({...newP, name: e.target.value})} />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-[10px] uppercase font-bold text-gray-500 ml-2">Ціна (₴)</label>
+                                            <input required type="number" className="w-full p-4 rounded-2xl mt-1 outline-none" placeholder="2800" value={newP.price} onChange={e => setNewP({...newP, price: e.target.value})} />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] uppercase font-bold text-gray-500 ml-2">Для кого</label>
+                                            <select className="w-full p-4 rounded-2xl mt-1 outline-none appearance-none" value={newP.gender} onChange={e => setNewP({...newP, gender: e.target.value})}>
+                                                <option value="male">Чоловікам</option>
+                                                <option value="female">Жінкам</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] uppercase font-bold text-gray-500 ml-2">Посилання на фото</label>
+                                        <input required className="w-full p-4 rounded-2xl mt-1 outline-none" placeholder="https://i.ibb.co/..." value={newP.img} onChange={e => setNewP({...newP, img: e.target.value})} />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] uppercase font-bold text-gray-500 ml-2">Опис (необов'язково)</label>
+                                        <textarea className="w-full p-4 rounded-2xl mt-1 outline-none h-24" placeholder="Натуральна шкіра..." value={newP.desc} onChange={e => setNewP({...newP, desc: e.target.value})}></textarea>
+                                    </div>
+                                    <button type="submit" className="w-full bg-blue-600 py-5 rounded-[24px] font-bold text-lg hover:bg-blue-500 transition mt-4">ОПУБЛІКУВАТИ</button>
+                                </form>
                             </div>
                         </div>
                     )}
