@@ -26,8 +26,9 @@
         .gradient-text { background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .modal-overlay { background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(10px); animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        /* Стилі для адмінки */
         .admin-input { background: #111; border: 1px solid #333; color: white; padding: 10px; border-radius: 12px; width: 100%; margin-bottom: 10px; }
+        .social-icon { background: rgba(255,255,255,0.05); transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.1); }
+        .social-icon:hover { background: #3b82f6; border-color: #3b82f6; transform: translateY(-3px); }
     </style>
 </head>
 <body>
@@ -37,17 +38,14 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // Конфігурація Firebase
-       // Конфігурація Firebase
-const firebaseConfig = {
-    apiKey: "AIzaSyBSmzapB-gtDeQNVq-m7GuJP0XF2_94aU",
-    authDomain: "crozali-shop.firebaseapp.com",
-    // ЦЬОГО РЯДКА НЕ ВИСТАЧАЛО:
-    databaseURL: "https://crozali-shop-default-rtdb.europe-west1.firebasedatabase.app", 
-    projectId: "crozali-shop",
-    storageBucket: "crozali-shop.firebasestorage.app",
-    messagingSenderId: "50262512045",
-    appId: "1:50262512045:web:a996b63a47480abd941124"
+        const firebaseConfig = {
+            apiKey: "AIzaSyBSmzapB-gtDeQNVq-m7GuJP0XF2_94aU",
+            authDomain: "crozali-shop.firebaseapp.com",
+            databaseURL: "https://crozali-shop-default-rtdb.europe-west1.firebasedatabase.app", 
+            projectId: "crozali-shop",
+            storageBucket: "crozali-shop.firebasestorage.app",
+            messagingSenderId: "50262512045",
+            appId: "1:50262512045:web:a996b63a47480abd941124"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -90,7 +88,7 @@ const firebaseConfig = {
             const [currentImg, setCurrentImg] = useState(0);
             const phone = "380673485909";
             const msg = encodeURIComponent("Добрий день! Цікавить модель: " + product.name);
-            const viberUrl = `viber://chat?number=%2B${phone}&draft=${msg}`;
+            const viberUrl = `viber://chat?number=%2B${phone}`;
             const whatsappUrl = `https://wa.me/${phone}?text=${msg}`;
 
             useEffect(() => { document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = 'unset'; }; }, []);
@@ -155,7 +153,6 @@ const firebaseConfig = {
             const handleAddProduct = () => {
                 const images = [newItem.img1, newItem.img2, newItem.img3].filter(url => url !== '');
                 if (!newItem.name || !newItem.price || images.length === 0) return alert("Заповніть назву, ціну та хоча б одне фото!");
-                
                 db.ref('products').push({
                     name: newItem.name,
                     price: newItem.price,
@@ -222,29 +219,40 @@ const firebaseConfig = {
 
                     <footer id="contacts" className="py-24 px-6 max-w-6xl mx-auto text-white">
                         <div className="grid md:grid-cols-2 gap-16">
-                            <div className="text-center md:text-left">
+                            <div className="text-center md:text-left flex flex-col justify-center">
                                 <h2 className="text-5xl font-bold mb-8">Маєш питання? <br/><span className="text-blue-500">Ми на зв'язку.</span></h2>
-                                <div className="space-y-6">
+                                <div className="space-y-8">
                                     <a href={`tel:${phone}`} className="flex items-center justify-center md:justify-start gap-4 text-2xl font-bold hover:text-blue-500 transition tracking-tight">
                                         <span className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center">📞</span>
                                         067 348 59 09
                                     </a>
+                                    
+                                    {/* БЛОК СОЦМЕРЕЖ */}
+                                    <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                                        <a href={`viber://chat?number=%2B${phone}`} title="Viber" className="social-icon w-14 h-14 rounded-2xl flex items-center justify-center text-2xl">💜</a>
+                                        <a href={`https://wa.me/${phone}`} target="_blank" title="WhatsApp" className="social-icon w-14 h-14 rounded-2xl flex items-center justify-center text-2xl">🟢</a>
+                                        <a href="https://t.me/crozali" target="_blank" title="Telegram" className="social-icon w-14 h-14 rounded-2xl flex items-center justify-center text-2xl">🔵</a>
+                                        <a href="https://www.tiktok.com/@rom4ik45" target="_blank" title="TikTok" className="social-icon w-14 h-14 rounded-2xl flex items-center justify-center text-2xl">📱</a>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="bg-[#111] p-10 rounded-3xl border border-white/5 h-fit text-center shadow-xl">
-                                <h3 className="text-xl font-bold mb-4">Графік роботи</h3>
-                                <p className="text-gray-400">Пн-Пт: 10:00 — 18:00</p>
-                                <p className="text-gray-400">Сб-Нд: 11:00 — 18:00</p>
+                            <div className="bg-[#111] p-10 rounded-3xl border border-white/5 h-fit text-center shadow-xl flex flex-col justify-center">
+                                <h3 className="text-xl font-bold mb-4 uppercase tracking-widest text-blue-500">Графік роботи</h3>
+                                <div className="space-y-2 text-lg">
+                                    <p className="text-white font-semibold text-2xl">Пн-Пт: <span className="text-gray-400">10:00 — 18:00</span></p>
+                                    <p className="text-white font-semibold text-2xl">Сб-Нд: <span className="text-gray-400">11:00 — 18:00</span></p>
+                                </div>
                             </div>
+                        </div>
+                        <div className="mt-24 pt-8 border-t border-white/5 text-center text-gray-600 text-sm">
+                            © 2024 CROZALI. Всі права захищені.
                         </div>
                     </footer>
 
-                    {/* Кнопка входу в адмінку */}
                     <button onClick={() => isAdmin ? setIsAdmin(false) : setShowLogin(true)} className="fixed bottom-6 right-6 z-[100] bg-white/5 p-4 rounded-full text-[10px] uppercase font-bold border border-white/10 hover:bg-blue-600 transition">
                         {isAdmin ? 'Вийти' : 'Admin'}
                     </button>
 
-                    {/* Вікно логіну */}
                     {showLogin && (
                         <div className="fixed inset-0 z-[300] bg-black/90 flex items-center justify-center p-6">
                             <div className="bg-[#111] p-8 rounded-3xl border border-blue-500 w-full max-w-sm">
@@ -256,7 +264,6 @@ const firebaseConfig = {
                         </div>
                     )}
 
-                    {/* Форма додавання товару */}
                     {showAddForm && (
                         <div className="fixed inset-0 z-[300] bg-black/95 flex items-center justify-center p-4 overflow-y-auto">
                             <div className="bg-[#111] p-8 rounded-3xl border border-white/10 w-full max-w-lg">
