@@ -16,6 +16,7 @@
             background-color: #020202; 
             color: white; 
             scroll-behavior: smooth; 
+            position: relative;
             overflow-x: hidden;
         }
 
@@ -23,26 +24,29 @@
             position: fixed;
             inset: 0;
             background-image: 
-                url("data:image/svg+xml,%3Csvg width='150' height='150' viewBox='0 0 150 150' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='10' y='20' fill='rgba(255,255,255,0.1)' font-family='monospace' font-size='10'%3E+%3C/text%3E%3C/svg%3E");
+                url("data:image/svg+xml,%3Csvg width='150' height='150' viewBox='0 0 150 150' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='10' y='20' fill='rgba(255,255,255,0.18)' font-family='monospace' font-size='10'%3E+%3C/text%3E%3Ctext x='100' y='40' fill='rgba(255,255,255,0.18)' font-family='monospace' font-size='10'%3E-%3C/text%3E%3Ctext x='50' y='120' fill='rgba(255,255,255,0.18)' font-family='monospace' font-size='10'%3E+%3C/text%3E%3Ctext x='130' y='140' fill='rgba(255,255,255,0.18)' font-family='monospace' font-size='10'%3E-%3C/text%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg width='250' height='250' viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='30' y='200' fill='rgba(255,255,255,0.28)' font-family='monospace' font-size='16'%3E-%3C/text%3E%3Ctext x='180' y='50' fill='rgba(255,255,255,0.28)' font-family='monospace' font-size='16'%3E+%3C/text%3E%3Ctext x='210' y='220' fill='rgba(255,255,255,0.28)' font-family='monospace' font-size='16'%3E+%3C/text%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg width='350' height='350' viewBox='0 0 350 350' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='280' y='300' fill='rgba(255,255,255,0.45)' font-family='monospace' font-size='22'%3E+%3C/text%3E%3Ctext x='60' y='80' fill='rgba(255,255,255,0.45)' font-family='monospace' font-size='22'%3E-%3C/text%3E%3C/svg%3E");
+            background-size: 150px 150px, 250px 250px, 350px 350px;
             pointer-events: none;
             z-index: -1;
         }
 
         .nav-blur { background: rgba(2, 2, 2, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .product-card { background: rgba(17, 17, 17, 0.85); border: 1px solid #222; transition: all 0.3s ease; cursor: pointer; }
-        .product-card:hover { border-color: #3b82f6; }
+        .product-card { background: rgba(17, 17, 17, 0.85); border: 1px solid #222; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; backdrop-filter: blur(4px); }
+        .product-card:hover { border-color: #3b82f6; transform: translateY(-5px); box-shadow: 0 20px 40px rgba(59, 130, 246, 0.1); }
         
-        .slider-btn { 
-            background: rgba(0,0,0,0.6); 
-            backdrop-filter: blur(4px); 
-            transition: 0.2s; 
-        }
+        .slider-btn { background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); transition: 0.3s; }
         .slider-btn:hover { background: #3b82f6; }
 
-        /* Стиль для твоїх точок/ліній (пагінації) */
-        .dot { height: 4px; border-radius: 2px; transition: all 0.3s ease; background: rgba(255,255,255,0.3); }
-        .dot-active { width: 24px; background: #3b82f6; }
-        .dot-inactive { width: 6px; }
+        /* Твої нові динамічні кнопки (індикатори) */
+        .indicator-dot { height: 4px; border-radius: 2px; transition: all 0.3s ease; background: rgba(255,255,255,0.3); }
+        .indicator-active { width: 24px; background: #3b82f6; } /* Довга синя (або жовта) */
+        .indicator-inactive { width: 6px; } /* Маленька точка */
+
+        .gradient-text { background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .modal-overlay { background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(10px); animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -53,45 +57,42 @@
         const { useState, useEffect } = React;
 
         const INITIAL_PRODUCTS = [
-            { id: '1', name: 'Чоловічі Монкі', gender: 'male', price: 3000, images: ['https://i.ibb.co/rWJwTzn/2026-03-17-154838389.png', 'https://i.ibb.co/PZQZqMft/image.png', 'https://i.ibb.co/2YSYVpDQ/image.png'], description: 'Класика, що не потребує представлення.' },
-            { id: '2', name: 'Жіноча класика', gender: 'female', price: 2500, images: ['https://i.ibb.co/qYB5xSy5/image.png', 'https://i.ibb.co/xqV4vRJb/image.png', 'https://i.ibb.co/bR3bRqmr/image.png'], description: 'Масивна підошва та преміальна шкіра.' },
-            { id: '3', name: 'Жіночі туфлі сірі', gender: 'female', price: 2800, images: ['https://i.ibb.co/vCMqnm4f/image.png', 'https://i.ibb.co/mCmmps5L/image.png', 'https://i.ibb.co/fd8NCwvy/image.png'], description: 'Нат шкіра шевро, каблук 6 см.' },
-            // Можна додати інші моделі сюди...
+            { id: '1', name: 'Чоловічі Монкі', gender: 'male', price: 3000, images: ['https://i.ibb.co/rWJwTzn/2026-03-17-154838389.png', 'https://i.ibb.co/PZQZqMft/image.png', 'https://i.ibb.co/2YSYVpDQ/image.png'], description: 'Класика, що не потребує представлення. Ідеальний комфорт та стиль.' },
+            { id: '2', name: 'Жіноча класика', gender: 'female', price: 2500, images: ['https://i.ibb.co/qYB5xSy5/image.png', 'https://i.ibb.co/xqV4vRJb/image.png', 'https://i.ibb.co/bR3bRqmr/image.png'], description: 'Масивна підошва та преміальна шкіра. Твій зухвалий акцент у щоденному образі.' },
+            { id: '3', name: 'Туфлі жіночі класичні чорні', gender: 'female', price: 2800, images: ['https://i.ibb.co/rfNTYj7b/image.png', 'https://i.ibb.co/whD7q7zV/image.png', 'https://i.ibb.co/VpjDhLGb/image.png'], description: 'Класичні жіночі туфлі каблук 6 см, натур шкіра, натуральний підклад шевро' },
+            { id: '4', name: 'Жіночі туфлі коричневі', gender: 'female', price: 2800, images: ['https://i.ibb.co/ZRbL14xg/image.png', 'https://i.ibb.co/TB9q4zqv/image.png', 'https://i.ibb.co/sp5q14Sz/image.png'], description: 'Нат шкіра шевро, каблук 6 см. Твій ідеальний стиль на кожен день.' },
+            { id: '5', name: 'Жіночі туфлі сірі', gender: 'female', price: 2800, images: ['https://i.ibb.co/vCMqnm4f/image.png', 'https://i.ibb.co/mCmmps5L/image.png', 'https://i.ibb.co/fd8NCwvy/image.png'], description: 'Нат шкіра шевро, каблук 6 см. Взуття, що закохує з першого погляду.' },
+            { id: '6', name: 'Туфлі жіночі бузкового кольору', gender: 'female', price: 2800, images: ['https://i.ibb.co/9k1mMyFr/image.png', 'https://i.ibb.co/7JVHjzy9/image.png', 'https://i.ibb.co/jkp4yZpn/image.png'], description: 'Каблуки жіночі натур шкіра, каблук 6 см, бузковий колір.' },
+            { id: '7', name: 'Чоловічі кеди', gender: 'male', price: 2450, images: ['https://i.ibb.co/cX6qww3h/image.png', 'https://i.ibb.co/1fdLCw5P/image.png', 'https://i.ibb.co/tTV2BsK3/image.png'], description: 'Чоловічі кеди коричневого кольору, нубук + замша (натур шкіра).' },
+            { id: '8', name: 'Чоловічі туфлі', gender: 'male', price: 2100, images: ['https://i.ibb.co/v4h5sVmx/image.png', 'https://i.ibb.co/wZS25Kry/image.png', 'https://i.ibb.co/yvKbvZw/image.png'], description: 'Чоловічі туфлі чорного кольору, натуральна шкіра.' }
         ];
 
         function ProductCard({ product, onOpen }) {
             const [currentImg, setCurrentImg] = useState(0);
-
-            const next = (e) => { 
-                e.stopPropagation(); 
-                setCurrentImg(prev => (prev === product.images.length - 1 ? 0 : prev + 1)); 
-            };
-            const prev = (e) => { 
-                e.stopPropagation(); 
-                setCurrentImg(prev => (prev === 0 ? product.images.length - 1 : prev - 1)); 
-            };
+            const next = (e) => { e.stopPropagation(); setCurrentImg(prev => (prev === product.images.length - 1 ? 0 : prev + 1)); };
+            const prev = (e) => { e.stopPropagation(); setCurrentImg(prev => (prev === 0 ? product.images.length - 1 : prev - 1)); };
 
             return (
                 <div onClick={() => onOpen(product)} className="product-card rounded-3xl overflow-hidden flex flex-col h-full group">
-                    <div className="relative h-72 overflow-hidden bg-black">
-                        <img src={product.images[currentImg]} className="w-full h-full object-cover transition-opacity duration-300" />
+                    <div className="relative h-72 overflow-hidden bg-black/40">
+                        <img src={product.images[currentImg]} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                         
-                        {/* Кнопки вліво/вправо */}
-                        <div className="absolute inset-0 flex items-center justify-between px-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                        {/* Стрілки */}
+                        <div className="absolute inset-0 flex items-center justify-between px-4 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button onClick={prev} className="slider-btn w-10 h-10 rounded-full text-white flex items-center justify-center">❮</button>
                             <button onClick={next} className="slider-btn w-10 h-10 rounded-full text-white flex items-center justify-center">❯</button>
                         </div>
 
-                        {/* ТІ САМІ КНОПКИ-ТОЧКИ (ДИНАМІЧНІ) */}
+                        {/* Ті самі динамічні точки (пагінація) */}
                         <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
                             {product.images.map((_, idx) => (
-                                <div key={idx} className={`dot ${idx === currentImg ? 'dot-active' : 'dot-inactive'}`}></div>
+                                <div key={idx} className={`indicator-dot ${idx === currentImg ? 'indicator-active' : 'indicator-inactive'}`}></div>
                             ))}
                         </div>
                     </div>
-                    <div className="p-6 flex flex-col flex-grow">
+                    <div className="p-6 flex flex-col flex-grow text-center md:text-left">
                         <h3 className="text-xl font-bold mb-2">{product.name}</h3>
-                        <p className="text-gray-400 text-sm mb-6 flex-grow">{product.description}</p>
+                        <p className="text-gray-400 text-sm mb-6 flex-grow line-clamp-2">{product.description}</p>
                         <div className="flex justify-between items-center">
                             <span className="text-2xl font-extrabold text-blue-500">{product.price} ₴</span>
                             <span className="text-blue-400 text-sm font-bold underline">Детальніше</span>
@@ -101,17 +102,130 @@
             );
         }
 
-        // Решта компонентів (App, Modal) залишаються такими ж, як раніше...
-        function App() {
-            const [selectedProduct, setSelectedProduct] = useState(null);
+        function Modal({ product, onClose }) {
+            const [currentImg, setCurrentImg] = useState(0);
+            const phone = "380673485909";
+            const msg = encodeURIComponent("Добрий день! Цікавить модель: " + product.name);
+            const viberUrl = `viber://chat?number=%2B${phone}&draft=${msg}`;
+            const whatsappUrl = `https://wa.me/${phone}?text=${msg}`;
+
+            useEffect(() => { document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = 'unset'; }; }, []);
+
             return (
-                <div className="min-h-screen py-24 px-6 max-w-6xl mx-auto">
-                    <h2 className="text-4xl font-bold text-center mb-16">Наш каталог</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                        {INITIAL_PRODUCTS.map(p => (
-                            <ProductCard key={p.id} product={p} onOpen={setSelectedProduct} />
-                        ))}
+                <div className="fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-4 md:p-8" onClick={onClose}>
+                    <div className="bg-[#111] w-full max-w-5xl max-h-[90vh] rounded-3xl overflow-hidden flex flex-col md:flex-row relative shadow-2xl" onClick={e => e.stopPropagation()}>
+                        <button onClick={onClose} className="absolute top-4 right-4 z-10 w-12 h-12 bg-black/50 hover:bg-red-500 rounded-full text-white text-2xl flex items-center justify-center transition-colors">✕</button>
+                        <div className="w-full md:w-3/5 h-[40vh] md:h-auto relative bg-black">
+                            <img src={product.images[currentImg]} className="w-full h-full object-contain" />
+                            <div className="absolute inset-0 flex items-center justify-between px-4">
+                                <button onClick={() => setCurrentImg(prev => (prev === 0 ? product.images.length - 1 : prev - 1))} className="slider-btn w-12 h-12 rounded-full text-white flex items-center justify-center">❮</button>
+                                <button onClick={() => setCurrentImg(prev => (prev === product.images.length - 1 ? 0 : prev + 1))} className="slider-btn w-12 h-12 rounded-full text-white flex items-center justify-center">❯</button>
+                            </div>
+                            {/* Пагінація також у модалці */}
+                            <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2 pointer-events-none">
+                                {product.images.map((_, idx) => (
+                                    <div key={idx} className={`indicator-dot ${idx === currentImg ? 'indicator-active' : 'indicator-inactive'}`}></div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="w-full md:w-2/5 p-8 flex flex-col overflow-y-auto">
+                            <h2 className="text-3xl font-bold mb-4">{product.name}</h2>
+                            <div className="text-3xl font-extrabold text-blue-500 mb-6">{product.price} ₴</div>
+                            <div className="mb-8 flex-grow text-center md:text-left">
+                                <h4 className="text-gray-400 uppercase text-xs font-bold tracking-widest mb-2">Опис моделі</h4>
+                                <p className="text-gray-300 leading-relaxed text-lg">{product.description}</p>
+                            </div>
+                            <div className="space-y-3">
+                                <a href={viberUrl} className="w-full bg-[#7360f2] text-white py-3 rounded-2xl font-bold hover:bg-[#6251d4] transition-colors text-center flex items-center justify-center gap-2">
+                                    <span>💜</span> Viber
+                                </a>
+                                <a href={whatsappUrl} className="w-full bg-[#25D366] text-white py-3 rounded-2xl font-bold hover:bg-[#1ebd5b] transition-colors text-center flex items-center justify-center gap-2">
+                                    <span>🟢</span> WhatsApp
+                                </a>
+                                <a href={`tel:${phone}`} className="w-full bg-white text-black py-3 rounded-2xl font-bold hover:bg-gray-200 transition-colors text-center flex items-center justify-center gap-2">
+                                    <span>📞</span> Подзвонити
+                                </a>
+                            </div>
+                        </div>
                     </div>
+                </div>
+            );
+        }
+
+        function App() {
+            const [filter, setFilter] = useState('all');
+            const [selectedProduct, setSelectedProduct] = useState(null);
+            const filtered = INITIAL_PRODUCTS.filter(p => filter === 'all' || p.gender === filter);
+            const phone = "380673485909";
+
+            return (
+                <div className="min-h-screen">
+                    <nav className="fixed top-0 w-full z-50 nav-blur">
+                        <div className="max-w-6xl mx-auto px-6 h-20 flex justify-between items-center">
+                            <span className="text-2xl font-extrabold tracking-tighter">CROZALI</span>
+                            <div className="hidden md:flex gap-8 text-sm font-bold uppercase tracking-widest text-white">
+                                <a href="#catalog" className="hover:text-blue-500 transition">Каталог</a>
+                                <a href="#about" className="hover:text-blue-500 transition">Про нас</a>
+                                <a href="#contacts" className="hover:text-blue-500 transition">Контакти</a>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <section className="pt-48 pb-24 px-6 text-center">
+                        <h1 className="text-6xl md:text-8xl font-extrabold mb-6 gradient-text tracking-tighter uppercase leading-tight">Step Into <br/> Future</h1>
+                        <p className="text-gray-400 text-xl max-w-2xl mx-auto mb-10 italic">"Найкращий спосіб передбачити майбутнє — створити його власним кроком."</p>
+                        <a href="#catalog" className="inline-block bg-blue-600 px-10 py-4 rounded-2xl font-extrabold hover:bg-blue-700 transition shadow-2xl shadow-blue-500/20 uppercase tracking-widest text-sm">ПЕРЕГЛЯНУТИ КАТАЛОГ</a>
+                    </section>
+
+                    <section id="catalog" className="py-24 px-6 max-w-6xl mx-auto">
+                        <div className="flex flex-col items-center text-center mb-16 gap-8">
+                            <div>
+                                <h2 className="text-4xl font-bold mb-2 text-center">Наш каталог</h2>
+                                <p className="text-gray-500 tracking-wide uppercase text-xs font-bold">Обирай свою ідеальну пару</p>
+                            </div>
+                            <div className="flex flex-wrap justify-center bg-[#111] p-1.5 rounded-2xl border border-white/5">
+                                {['all', 'male', 'female'].map(type => (
+                                    <button key={type} onClick={() => setFilter(type)} className={`px-8 py-2.5 rounded-xl text-sm font-bold transition ${filter === type ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`}>
+                                        {type === 'all' ? 'Всі' : type === 'male' ? 'Чоловічі' : 'Жіночі'}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                            {filtered.map(p => <ProductCard key={p.id} product={p} onOpen={setSelectedProduct} />)}
+                        </div>
+                    </section>
+
+                    {selectedProduct && <Modal product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
+
+                    <section id="about" className="py-24 bg-black/40 border-y border-white/5 backdrop-blur-sm">
+                        <div className="max-w-4xl mx-auto px-6 text-center">
+                            <h2 className="text-4xl font-bold mb-8 text-blue-500">Ми — Crozali</h2>
+                            <div className="text-gray-300 space-y-6 text-lg leading-relaxed font-medium">
+                                <p>Понад 8 років ми робимо нашим клієнтам шкіряне взуття, яке поєднує в собі стиль та комфорт.</p>
+                                <p>Наша місія — зробити найкраще шкіряне взуття з гарантією якості. Також робимо взуття на замовлення.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <footer id="contacts" className="py-24 px-6 max-w-6xl mx-auto text-white">
+                        <div className="grid md:grid-cols-2 gap-16">
+                            <div className="text-center md:text-left">
+                                <h2 className="text-5xl font-bold mb-8">Маєш питання? <br/><span className="text-blue-500">Ми на зв'язку.</span></h2>
+                                <div className="space-y-6">
+                                    <a href={`tel:${phone}`} className="flex items-center justify-center md:justify-start gap-4 text-2xl font-bold hover:text-blue-500 transition tracking-tight">
+                                        <span className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center">📞</span>
+                                        067 348 59 09
+                                    </a>
+                                </div>
+                            </div>
+                            <div className="bg-[#111] p-10 rounded-3xl border border-white/5 h-fit text-center shadow-xl">
+                                <h3 className="text-xl font-bold mb-4">Графік роботи</h3>
+                                <p className="text-gray-400">Пн-Пт: 10:00 — 18:00</p>
+                                <p className="text-gray-400">Сб-Нд: 11:00 — 18:00</p>
+                            </div>
+                        </div>
+                    </footer>
                 </div>
             );
         }
