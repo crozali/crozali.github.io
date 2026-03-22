@@ -47,12 +47,25 @@
             messagingSenderId: "50262512045",
             appId: "1:50262512045:web:a996b63a47480abd941124"
         };
+        // Ініціалізація Firebase (Compat version)
         firebase.initializeApp(firebaseConfig);
+        
+        // Отримуємо посилання на базу даних через простір імен firebase
         const db = firebase.database();
 
         function ProductCard({ product, onOpen, isAdmin, onDelete }) {
             const [currentImg, setCurrentImg] = useState(0);
             
+            // Запобігаємо відкриттю модалки при кліку на стрілки
+            const next = (e) => { 
+                e.stopPropagation(); 
+                setCurrentImg(prev => (prev === product.images.length - 1 ? 0 : prev + 1)); 
+            };
+            
+            const prev = (e) => { 
+                e.stopPropagation(); 
+                setCurrentImg(prev => (prev === 0 ? product.images.length - 1 : prev - 1)); 
+            };
             const next = (e) => { 
                 e.stopPropagation(); 
                 e.preventDefault();
