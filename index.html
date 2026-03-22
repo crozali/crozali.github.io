@@ -39,10 +39,9 @@
         .slider-btn { background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); transition: 0.3s; }
         .slider-btn:hover { background: #3b82f6; }
 
-        /* Твої нові динамічні кнопки (індикатори) */
         .indicator-dot { height: 4px; border-radius: 2px; transition: all 0.3s ease; background: rgba(255,255,255,0.3); }
-        .indicator-active { width: 24px; background: #3b82f6; } /* Довга синя (або жовта) */
-        .indicator-inactive { width: 6px; } /* Маленька точка */
+        .indicator-active { width: 24px; background: #3b82f6; }
+        .indicator-inactive { width: 6px; }
 
         .gradient-text { background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .modal-overlay { background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(10px); animation: fadeIn 0.3s ease; }
@@ -76,14 +75,10 @@
                 <div onClick={() => onOpen(product)} className="product-card rounded-3xl overflow-hidden flex flex-col h-full group">
                     <div className="relative h-72 overflow-hidden bg-black/40">
                         <img src={product.images[currentImg]} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                        
-                        {/* Стрілки */}
                         <div className="absolute inset-0 flex items-center justify-between px-4 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button onClick={prev} className="slider-btn w-10 h-10 rounded-full text-white flex items-center justify-center">❮</button>
                             <button onClick={next} className="slider-btn w-10 h-10 rounded-full text-white flex items-center justify-center">❯</button>
                         </div>
-
-                        {/* Ті самі динамічні точки (пагінація) */}
                         <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
                             {product.images.map((_, idx) => (
                                 <div key={idx} className={`indicator-dot ${idx === currentImg ? 'indicator-active' : 'indicator-inactive'}`}></div>
@@ -121,7 +116,6 @@
                                 <button onClick={() => setCurrentImg(prev => (prev === 0 ? product.images.length - 1 : prev - 1))} className="slider-btn w-12 h-12 rounded-full text-white flex items-center justify-center">❮</button>
                                 <button onClick={() => setCurrentImg(prev => (prev === product.images.length - 1 ? 0 : prev + 1))} className="slider-btn w-12 h-12 rounded-full text-white flex items-center justify-center">❯</button>
                             </div>
-                            {/* Пагінація також у модалці */}
                             <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2 pointer-events-none">
                                 {product.images.map((_, idx) => (
                                     <div key={idx} className={`indicator-dot ${idx === currentImg ? 'indicator-active' : 'indicator-inactive'}`}></div>
@@ -162,7 +156,7 @@
                 <div className="min-h-screen">
                     <nav className="fixed top-0 w-full z-50 nav-blur">
                         <div className="max-w-6xl mx-auto px-6 h-20 flex justify-between items-center">
-                            <span className="text-2xl font-extrabold tracking-tighter">CROZALI</span>
+                            <span className="text-2xl font-extrabold tracking-tighter text-blue-500">CROZALI</span>
                             <div className="hidden md:flex gap-8 text-sm font-bold uppercase tracking-widest text-white">
                                 <a href="#catalog" className="hover:text-blue-500 transition">Каталог</a>
                                 <a href="#about" className="hover:text-blue-500 transition">Про нас</a>
@@ -180,7 +174,7 @@
                     <section id="catalog" className="py-24 px-6 max-w-6xl mx-auto">
                         <div className="flex flex-col items-center text-center mb-16 gap-8">
                             <div>
-                                <h2 className="text-4xl font-bold mb-2 text-center">Наш каталог</h2>
+                                <h2 className="text-4xl font-bold mb-2">Наш каталог</h2>
                                 <p className="text-gray-500 tracking-wide uppercase text-xs font-bold">Обирай свою ідеальну пару</p>
                             </div>
                             <div className="flex flex-wrap justify-center bg-[#111] p-1.5 rounded-2xl border border-white/5">
@@ -217,12 +211,28 @@
                                         <span className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center">📞</span>
                                         067 348 59 09
                                     </a>
+                                    
+                                    {/* Месенджери та Соцмережі */}
+                                    <div className="grid grid-cols-2 gap-4 pt-4 max-w-sm mx-auto md:mx-0">
+                                        <a href={`https://wa.me/${phone}`} target="_blank" className="p-4 bg-white/5 rounded-2xl hover:bg-[#25D366] transition flex items-center justify-center gap-3 font-bold border border-white/10">
+                                            <span>🟢</span> WhatsApp
+                                        </a>
+                                        <a href="https://www.tiktok.com" target="_blank" className="p-4 bg-white/5 rounded-2xl hover:bg-black hover:border-red-500 transition flex items-center justify-center gap-3 font-bold border border-white/10">
+                                            <span>🎬</span> TikTok
+                                        </a>
+                                        <a href={`viber://chat?number=%2B${phone}`} target="_blank" className="p-4 bg-white/5 rounded-2xl hover:bg-[#7360f2] transition flex items-center justify-center gap-3 font-bold border border-white/10">
+                                            <span>💜</span> Viber
+                                        </a>
+                                        <a href="https://t.me" target="_blank" className="p-4 bg-white/5 rounded-2xl hover:bg-[#0088cc] transition flex items-center justify-center gap-3 font-bold border border-white/10">
+                                            <span>✈️</span> Telegram
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                             <div className="bg-[#111] p-10 rounded-3xl border border-white/5 h-fit text-center shadow-xl">
-                                <h3 className="text-xl font-bold mb-4">Графік роботи</h3>
-                                <p className="text-gray-400">Пн-Пт: 10:00 — 18:00</p>
-                                <p className="text-gray-400">Сб-Нд: 11:00 — 18:00</p>
+                                <h3 className="text-xl font-bold mb-4 uppercase tracking-widest text-gray-400">Графік роботи</h3>
+                                <p className="text-xl font-bold mb-1">Пн-Пт: 10:00 — 18:00</p>
+                                <p className="text-xl font-bold">Сб-Нд: 11:00 — 18:00</p>
                             </div>
                         </div>
                     </footer>
@@ -235,3 +245,4 @@
     </script>
 </body>
 </html>
+</footer>
