@@ -62,14 +62,12 @@
         const db = firebase.database();
 
         // Optimized Product Card with Loading State
-        const ProductCard = React.memo(({ product, onOpen, isAdmin, onDelete }) => {
+        const ProductCard = React.memo(({ product, onOpen, isAdmin, onDelete, onEdit }) => {
             const [currentImg, setCurrentImg] = useState(0);
             const [isLoaded, setIsLoaded] = useState(false);
 
-            // Сброс состояния загрузки при смене картинки
             useEffect(() => {
                 setIsLoaded(false);
-                // Preload next image
                 if (product.images && product.images.length > 1) {
                     const nextIndex = (currentImg + 1) % product.images.length;
                     const img = new Image();
@@ -90,11 +88,13 @@
             return (
                 <div onClick={() => onOpen(product)} className="product-card rounded-3xl overflow-hidden flex flex-col h-full group relative">
                     {isAdmin && (
-                        <button onClick={(e) => { e.stopPropagation(); onDelete(product.id); }} className="absolute top-4 right-4 z-[60] bg-red-600 w-8 h-8 rounded-full flex items-center justify-center font-bold hover:scale-110 transition">✕</button>
+                        <div className="absolute top-4 right-4 z-[60] flex gap-2">
+                            <button onClick={(e) => { e.stopPropagation(); onEdit(product); }} className="bg-blue-600 w-8 h-8 rounded-full flex items-center justify-center font-bold hover:scale-110 transition">✎</button>
+                            <button onClick={(e) => { e.stopPropagation(); onDelete(product.id); }} className="bg-red-600 w-8 h-8 rounded-full flex items-center justify-center font-bold hover:scale-110 transition">✕</button>
+                        </div>
                     )}
                     
                     <div className="relative h-72 overflow-hidden bg-black/40">
-                        {/* Skeleton Loader Overlay */}
                         {!isLoaded && (
                             <div className="absolute inset-0 z-10 skeleton flex flex-col items-center justify-center">
                                 <div className="w-8 h-8 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mb-2"></div>
@@ -186,6 +186,7 @@
             const [products, setProducts] = useState([]);
             const [filter, setFilter] = useState('all');
             const [selectedProduct, setSelectedProduct] = useState(null);
+            const [editingProduct, setEditingProduct] = useState(null);
             const [isAdmin, setIsAdmin] = useState(false);
             const [showAddForm, setShowAddForm] = useState(false);
             const [loginPass, setLoginPass] = useState('');
@@ -218,6 +219,15 @@
                 });
                 setNewItem({ name: '', price: '', description: '', img1: '', img2: '', img3: '', gender: 'male' });
                 setShowAddForm(false);
+            };
+
+            const handleUpdateProduct = () => {
+                if (!editingProduct.price) return alert("Ціна не може бути порожньою!");
+                db.ref('products/' + editingProduct.id).update({
+                    price: editingProduct.price,
+                    description: editingProduct.description
+                });
+                setEditingProduct(null);
             };
 
             const filtered = useMemo(() => 
@@ -265,7 +275,8 @@
                                     key={p.id} 
                                     product={p} 
                                     isAdmin={isAdmin} 
-                                    onDelete={(id) => db.ref('products/' + id).remove()} 
+                                    onDelete={(id) => { if(confirm('Видалити цей товар?')) db.ref('products/' + id).remove() }} 
+                                    onEdit={setEditingProduct}
                                     onOpen={setSelectedProduct} 
                                 />
                             ))}
@@ -273,6 +284,36 @@
                     </section>
 
                     {selectedProduct && <Modal product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
+
+                    {/* Модалка Редагування */}
+                    {editingProduct && (
+                        <div className="fixed inset-0 z-[400] bg-black/95 flex items-center justify-center p-4">
+                            <div className="bg-[#111] p-8 rounded-3xl border border-blue-500 w-full max-w-lg">
+                                <h2 className="text-2xl font-bold mb-6 text-blue-500 uppercase">Редагувати дані</h2>
+                                <p className="text-gray-400 mb-4 font-bold">{editingProduct.name}</p>
+                                
+                                <label className="text-xs text-gray-500 uppercase font-bold">Ціна (₴)</label>
+                                <input 
+                                    value={editingProduct.price} 
+                                    type="number" 
+                                    className="admin-input" 
+                                    onChange={e => setEditingProduct({...editingProduct, price: e.target.value})} 
+                                />
+                                
+                                <label className="text-xs text-gray-500 uppercase font-bold">Опис</label>
+                                <textarea 
+                                    value={editingProduct.description} 
+                                    className="admin-input h-32" 
+                                    onChange={e => setEditingProduct({...editingProduct, description: e.target.value})} 
+                                />
+
+                                <div className="flex gap-4 mt-4">
+                                    <button onClick={handleUpdateProduct} className="flex-1 bg-blue-600 py-4 rounded-xl font-bold">ЗБЕРЕГТИ ЗМІНИ</button>
+                                    <button onClick={() => setEditingProduct(null)} className="flex-1 bg-white/5 py-4 rounded-xl font-bold">СКАСУВАТИ</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <section id="about" className="py-24 bg-black/40 border-y border-white/5 backdrop-blur-sm">
                         <div className="max-w-4xl mx-auto px-6 text-center">
