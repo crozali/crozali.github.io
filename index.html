@@ -41,9 +41,17 @@
 </head>
 <body>
     <div class="chaos-bg"></div>
-    <div id="root"></div>
+    <div id="root"></div> <script>
+  Babel.registerPreset("classic-react", {
+    presets: [
+      [Babel.availablePresets["react"], { runtime: "classic" }]
+    ]
+  });
+</script>
 
-       <script type="text/babel">
+
+              <script type="text/babel" data-presets="classic-react">
+
 
         const { useState, useEffect, useMemo, useCallback } = React;
 
