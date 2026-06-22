@@ -43,7 +43,8 @@
     <div class="chaos-bg"></div>
     <div id="root"></div>
 
-    <script type="text/babel">
+       <script type="text/babel">
+        /** @jsxRuntime classic */
         const { useState, useEffect, useMemo, useCallback } = React;
 
         const firebaseConfig = {
@@ -60,6 +61,7 @@
             firebase.initializeApp(firebaseConfig);
         }
         const db = firebase.database();
+        
 
         // Optimized Product Card with Loading State
         const ProductCard = React.memo(({ product, onOpen, isAdmin, onDelete, onEdit }) => {
