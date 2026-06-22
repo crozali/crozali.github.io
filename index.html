@@ -44,23 +44,40 @@
     <div id="root"></div>
 
        <script type="text/babel">
-        /** @jsxRuntime classic */
+
         const { useState, useEffect, useMemo, useCallback } = React;
 
+
+
         const firebaseConfig = {
+
             apiKey: "AIzaSyBSmzapB-gtDeQNVq-m7GuJP0XF2_94aU",
+
             authDomain: "crozali-shop.firebaseapp.com",
+
             databaseURL: "https://crozali-shop-default-rtdb.europe-west1.firebasedatabase.app", 
+
             projectId: "crozali-shop",
+
             storageBucket: "crozali-shop.firebasestorage.app",
+
             messagingSenderId: "50262512045",
+
             appId: "1:50262512045:web:a996b63a47480abd941124"
+
         };
+
         
+
         if (!firebase.apps.length) {
+
             firebase.initializeApp(firebaseConfig);
+
         }
-        const db = firebase.database();
+
+        const db = firebase.database(); 
+
+    
         
 
         // Optimized Product Card with Loading State
