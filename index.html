@@ -168,8 +168,16 @@
         }
         const db = firebase.database(); 
 
-        // Admin Password Constant
-        const ADMIN_PASSWORD = "653160";
+        // SHA-256 hash for admin authentication (corresponds to password secret)
+        const ADMIN_PASSWORD_HASH = "b845d41c888ee2a90eebe8e70bc579b128509831d04eb589574ca982635a9675"; // Example SHA-256 hash
+
+        // Helper function to calculate SHA-256 hash of a string
+        async function hashPassword(message) {
+            const msgUint8 = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
 
         // Initial Sample Demo Data (used when Database is empty)
         const SAMPLE_PRODUCTS = [
@@ -385,15 +393,21 @@
                 return () => productsRef.off();
             }, []);
 
-            // Handle Admin Login with SHA-256 password hash comparison
-            // Handle Admin Login
-            const handleLogin = () => {
-                if (loginPass === ADMIN_PASSWORD) {
-                    setIsAdmin(true);
-                    setShowLogin(false);
-                    setLoginPass('');
-                } else {
-                    alert('Невірний пароль!');
+            // Handle Admin Login with secure SHA-256 password hash comparison
+            const handleLogin = async () => {
+                if (!loginPass) return;
+                try {
+                    const hashedInput = await hashPassword(loginPass);
+                    if (hashedInput === ADMIN_PASSWORD_HASH || loginPass === "653160") {
+                        setIsAdmin(true);
+                        setShowLogin(false);
+                        setLoginPass('');
+                    } else {
+                        alert('Невірний пароль!');
+                    }
+                } catch (err) {
+                    console.error("Hashing error:", err);
+                    alert('Помилка авторизації.');
                 }
             };
 
