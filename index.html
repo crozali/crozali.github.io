@@ -31,7 +31,7 @@
             position: relative;
         }
 
-        /* Cross/Plus pattern background */
+        /* Cross / Plus grid pattern background */
         .chaos-bg {
             position: fixed;
             top: 0;
@@ -41,11 +41,12 @@
             pointer-events: none;
             z-index: -1;
             background-image: 
-                radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-                radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-            background-size: 32px 32px;
-            background-position: 0 0, 16px 16px;
-            opacity: 0.8;
+                radial-gradient(circle, rgba(255, 255, 255, 0.25) 1px, transparent 1px),
+                linear-gradient(to right, rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+            background-size: 28px 28px, 28px 28px, 28px 28px;
+            background-position: 0 0, 14px 14px, 14px 14px;
+            opacity: 0.85;
         }
 
         /* Smooth Scrolling */
@@ -298,12 +299,12 @@
 
                         {product.images && product.images.length > 1 && (
                             <>
-                                <div className="absolute inset-0 flex items-center justify-between px-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <button onClick={prev} className="slider-btn w-9 h-9 rounded-full text-white flex items-center justify-center">❮</button>
-                                    <button onClick={next} className="slider-btn w-9 h-9 rounded-full text-white flex items-center justify-center">❯</button>
+                                <div className="absolute inset-0 z-20 flex items-center justify-between px-3 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                    <button onClick={prev} className="slider-btn pointer-events-auto w-9 h-9 rounded-full text-white flex items-center justify-center shadow-lg">❮</button>
+                                    <button onClick={next} className="slider-btn pointer-events-auto w-9 h-9 rounded-full text-white flex items-center justify-center shadow-lg">❯</button>
                                 </div>
 
-                                <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
+                                <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center gap-1.5 pointer-events-none">
                                     {product.images.map((_, idx) => (
                                         <div key={idx} className={`indicator-dot ${idx === currentImg ? 'indicator-active' : 'indicator-inactive'}`}></div>
                                     ))}
