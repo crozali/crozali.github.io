@@ -153,6 +153,19 @@
             background: rgba(59, 130, 246, 0.1);
         }
 
+        /* Discount Badges */
+        .badge-yellow {
+            background: #eab308;
+            color: #000000;
+            box-shadow: 0 4px 12px rgba(234, 179, 8, 0.4);
+        }
+
+        .badge-red {
+            background: #ef4444;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
@@ -203,6 +216,7 @@
                 id: "demo1",
                 name: "Шкіряні Челсі Classic Black",
                 price: "3499",
+                oldPrice: "3999",
                 gender: "male",
                 description: "Преміальна натуральна шкіра гладкої фактури. Зручні еластичні вставки та зносостійка підошва. Ідеально для повсякденного носіння та ділового стилю.",
                 images: [
@@ -213,7 +227,8 @@
             {
                 id: "demo2",
                 name: "Жіночі Шкіряні Черевики Urban",
-                price: "3299",
+                price: "2499",
+                oldPrice: "3299",
                 gender: "female",
                 description: "Ніжна шкіра теляти, байкова утеплена підкладка та масивна тракторна підошва. Комфортна колодка для прогулянок містом.",
                 images: [
@@ -225,6 +240,7 @@
                 id: "demo3",
                 name: "Чоловічі Лофери Premium Leather",
                 price: "2999",
+                oldPrice: "",
                 gender: "male",
                 description: "Ручна робота, 100% натуральна шкіра преміум класу. Шкіряна устілка з анатомічною підтримкою.",
                 images: [
@@ -234,9 +250,19 @@
             }
         ];
 
+        // Helper function to calculate discount percentage
+        const calcDiscount = (price, oldPrice) => {
+            const p = parseFloat(price);
+            const op = parseFloat(oldPrice);
+            if (!p || !op || op <= p) return 0;
+            return Math.round(((op - p) / op) * 100);
+        };
+
         const ProductCard = React.memo(({ product, onOpen, isAdmin, onDelete, onEdit }) => {
             const [currentImg, setCurrentImg] = useState(0);
             const [isLoaded, setIsLoaded] = useState(false);
+
+            const discountPercent = calcDiscount(product.price, product.oldPrice);
 
             useEffect(() => {
                 setIsLoaded(false);
@@ -261,6 +287,13 @@
 
             return (
                 <div onClick={() => onOpen(product)} className="product-card rounded-3xl overflow-hidden flex flex-col h-full group relative cursor-pointer">
+                    {/* Discount Badge */}
+                    {discountPercent > 0 && (
+                        <div className={`absolute top-4 left-4 z-30 px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase ${discountPercent <= 20 ? 'badge-yellow' : 'badge-red'}`}>
+                            -{discountPercent}%
+                        </div>
+                    )}
+
                     {isAdmin && (
                         <div className="absolute top-4 right-4 z-[60] flex gap-2">
                             <button 
@@ -314,9 +347,16 @@
                     <div className="p-6 flex flex-col flex-grow text-left">
                         <h3 className="text-xl font-bold mb-2 group-hover:text-blue-400 transition-colors">{product.name}</h3>
                         <p className="text-gray-400 text-sm mb-6 flex-grow line-clamp-2 leading-relaxed">{product.description}</p>
-                        <div className="flex justify-between items-center mt-auto pt-4 border-t border-white/5">
-                            <span className="text-2xl font-black text-blue-500">{product.price} ₴</span>
-                            <span className="text-blue-400 text-sm font-bold underline hover:text-blue-300 transition">Детальніше</span>
+                        <div className="flex justify-between items-end mt-auto pt-4 border-t border-white/5">
+                            <div className="flex items-baseline gap-2 flex-wrap">
+                                {product.oldPrice && parseFloat(product.oldPrice) > parseFloat(product.price) && (
+                                    <span className="text-sm font-semibold text-gray-500 line-through">
+                                        {product.oldPrice} ₴
+                                    </span>
+                                )}
+                                <span className="text-2xl font-black text-blue-500">{product.price} ₴</span>
+                            </div>
+                            <span className="text-blue-400 text-sm font-bold underline hover:text-blue-300 transition pb-0.5">Детальніше</span>
                         </div>
                     </div>
                 </div>
@@ -331,6 +371,8 @@
             const viberUrl = `viber://chat?number=%2B${phone}`;
             const whatsappUrl = `https://wa.me/${phone}?text=${msg}`;
 
+            const discountPercent = calcDiscount(product.price, product.oldPrice);
+
             useEffect(() => { 
                 document.body.style.overflow = 'hidden'; 
                 return () => { document.body.style.overflow = 'unset'; }; 
@@ -342,6 +384,12 @@
                         <button onClick={onClose} className="absolute top-4 right-4 z-20 w-10 h-10 bg-black/60 hover:bg-red-600 rounded-full text-white text-xl flex items-center justify-center transition-colors">✕</button>
 
                         <div className="w-full md:w-3/5 h-[350px] md:h-auto relative bg-black flex items-center justify-center">
+                            {discountPercent > 0 && (
+                                <div className={`absolute top-4 left-4 z-30 px-3.5 py-1.5 rounded-full text-xs font-black tracking-wider uppercase ${discountPercent <= 20 ? 'badge-yellow' : 'badge-red'}`}>
+                                    Акція -{discountPercent}%
+                                </div>
+                            )}
+
                             {!isLoaded && <div className="absolute inset-0 skeleton flex items-center justify-center text-blue-500 animate-pulse font-bold">Crozali...</div>}
                             <img 
                                 src={product.images && product.images.length > 0 ? product.images[currentImg] : ''} 
@@ -359,7 +407,14 @@
 
                         <div className="w-full md:w-2/5 p-8 flex flex-col overflow-y-auto">
                             <h2 className="text-3xl font-black mb-3 leading-tight">{product.name}</h2>
-                            <div className="text-3xl font-black text-blue-500 mb-6">{product.price} ₴</div>
+                            <div className="flex items-baseline gap-3 mb-6">
+                                {product.oldPrice && parseFloat(product.oldPrice) > parseFloat(product.price) && (
+                                    <span className="text-lg font-semibold text-gray-500 line-through">
+                                        {product.oldPrice} ₴
+                                    </span>
+                                )}
+                                <div className="text-3xl font-black text-blue-500">{product.price} ₴</div>
+                            </div>
                             
                             <div className="mb-8 flex-grow">
                                 <h4 className="text-gray-400 uppercase text-xs font-bold tracking-widest mb-2">Опис моделі</h4>
@@ -393,7 +448,7 @@
             const [loginPass, setLoginPass] = useState('');
             const [showLogin, setShowLogin] = useState(false);
             const [loginBusy, setLoginBusy] = useState(false);
-            const [newItem, setNewItem] = useState({ name: '', price: '', description: '', img1: '', img2: '', img3: '', gender: 'male' });
+            const [newItem, setNewItem] = useState({ name: '', price: '', oldPrice: '', description: '', img1: '', img2: '', img3: '', gender: 'male' });
 
             const phone = "380673485909";
 
@@ -452,12 +507,13 @@
                 db.ref('products').push({
                     name: newItem.name,
                     price: newItem.price,
+                    oldPrice: newItem.oldPrice || '',
                     description: newItem.description,
                     gender: newItem.gender,
                     images: images
                 });
 
-                setNewItem({ name: '', price: '', description: '', img1: '', img2: '', img3: '', gender: 'male' });
+                setNewItem({ name: '', price: '', oldPrice: '', description: '', img1: '', img2: '', img3: '', gender: 'male' });
                 setShowAddForm(false);
             };
 
@@ -465,6 +521,7 @@
                 if (!editingProduct.price) return alert("Ціна не може бути порожньою!");
                 db.ref('products/' + editingProduct.id).update({
                     price: editingProduct.price,
+                    oldPrice: editingProduct.oldPrice || '',
                     description: editingProduct.description
                 });
                 setEditingProduct(null);
@@ -567,13 +624,27 @@
                                 <h2 className="text-2xl font-bold mb-6 text-blue-500 uppercase">Редагувати дані</h2>
                                 <p className="text-gray-400 mb-4 font-bold">{editingProduct.name}</p>
 
-                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Ціна (₴)</label>
-                                <input 
-                                    value={editingProduct.price} 
-                                    type="number" 
-                                    className="admin-input" 
-                                    onChange={e => setEditingProduct({...editingProduct, price: e.target.value})} 
-                                />
+                                <div className="grid grid-cols-2 gap-4 mb-2">
+                                    <div>
+                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Акційна ціна (₴)</label>
+                                        <input 
+                                            value={editingProduct.price} 
+                                            type="number" 
+                                            className="admin-input" 
+                                            onChange={e => setEditingProduct({...editingProduct, price: e.target.value})} 
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Стара ціна (₴)</label>
+                                        <input 
+                                            value={editingProduct.oldPrice || ''} 
+                                            type="number" 
+                                            placeholder="напр. 3999"
+                                            className="admin-input" 
+                                            onChange={e => setEditingProduct({...editingProduct, oldPrice: e.target.value})} 
+                                        />
+                                    </div>
+                                </div>
 
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Опис</label>
                                 <textarea 
@@ -670,8 +741,16 @@
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Назва моделі</label>
                                 <input placeholder="напр. Лофери шкіряні" className="admin-input" onChange={e => setNewItem({...newItem, name: e.target.value})} />
                                 
-                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Ціна (грн)</label>
-                                <input placeholder="напр. 3200" type="number" className="admin-input" onChange={e => setNewItem({...newItem, price: e.target.value})} />
+                                <div className="grid grid-cols-2 gap-4 mb-2">
+                                    <div>
+                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Ціна (грн)</label>
+                                        <input placeholder="напр. 3499" type="number" className="admin-input" onChange={e => setNewItem({...newItem, price: e.target.value})} />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Стара ціна (грн)</label>
+                                        <input placeholder="напр. 3999" type="number" className="admin-input" onChange={e => setNewItem({...newItem, oldPrice: e.target.value})} />
+                                    </div>
+                                </div>
                                 
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Опис</label>
                                 <textarea placeholder="Короткий опис матеріалів..." className="admin-input h-24" onChange={e => setNewItem({...newItem, description: e.target.value})} />
