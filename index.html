@@ -533,7 +533,11 @@
                     alert("Товар успішно додано!");
                 } catch (error) {
                     console.error("Firebase Add Error:", error);
-                    alert("Помилка додавання: " + error.message + "\n\nПеревірте правила доступу Realtime Database в консолі Firebase!");
+                    if (error.code === 'PERMISSION_DENIED') {
+                        alert("Помилка доступу: У вас немає прав адміністратора для цієї дії. Перевірте Firebase Rules.");
+                    } else {
+                        alert("Помилка додавання: " + error.message);
+                    }
                 } finally {
                     setIsSubmitting(false);
                 }
@@ -553,7 +557,11 @@
                     alert("Зміни успішно збережено!");
                 } catch (error) {
                     console.error("Firebase Update Error:", error);
-                    alert("Помилка оновлення: " + error.message);
+                    if (error.code === 'PERMISSION_DENIED') {
+                        alert("Помилка доступу: відхилено правилами Firebase Rules.");
+                    } else {
+                        alert("Помилка оновлення: " + error.message);
+                    }
                 }
             };
 
@@ -563,7 +571,11 @@
                         await db.ref('products/' + id).remove();
                     } catch (error) {
                         console.error("Firebase Delete Error:", error);
-                        alert("Помилка видалення: " + error.message);
+                        if (error.code === 'PERMISSION_DENIED') {
+                            alert("Помилка доступу: відхилено правилами Firebase Rules.");
+                        } else {
+                            alert("Помилка видалення: " + error.message);
+                        }
                     }
                 }
             };
