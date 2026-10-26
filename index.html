@@ -189,7 +189,7 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo, useCallback } = React;
 
-        // Firebase Configuration (Updated with correct keys)
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBSmzapB-gtDeQNVq-M7GuJFPoXf2_94aU",
             authDomain: "crozali-shop.firebaseapp.com",
@@ -207,7 +207,6 @@
         const db = firebase.database();
         const auth = firebase.auth();
 
-        // Only an identifier for Firebase Auth — not a secret. Password lives in Firebase Console.
         const ADMIN_EMAIL = "admin@crozali.local";
 
         // Initial Sample Demo Data (used when Database is empty)
@@ -437,6 +436,76 @@
                 </div>
             );
         }
+
+        function App() {
+            const [products, setProducts] = useState([]);
+            const [filter, setFilter] = useState('all');
+            const [selectedProduct, setSelectedProduct] = useState(null);
+            const [editingProduct, setEditingProduct] = useState(null);
+            
+            const [isAdmin, setIsAdmin] = useState(false);
+            const [showLogin, setShowLogin] = useState(false);
+            const [loginPass, setLoginPass] = useState('');
+            const [loginBusy, setLoginBusy] = useState(false);
+
+            const [showAddForm, setShowAddForm] = useState(false);
+            const [newItem, setNewItem] = useState({
+                name: '', price: '', oldPrice: '', description: '', img1: '', img2: '', img3: '', gender: 'male'
+            });
+
+            const phone = "380673485909";
+
+            useEffect(() => {
+                const unsubscribeAuth = auth.onAuthStateChanged(user => {
+                    setIsAdmin(!!user);
+                });
+
+                const productsRef = db.ref('products');
+                const handleValue = (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        const productList = Object.keys(data).map(key => ({
+                            id: key,
+                            ...data[key]
+                        }));
+                        setProducts(productList.reverse());
+                    } else {
+                        setProducts(SAMPLE_PRODUCTS);
+                    }
+                };
+
+                productsRef.on('value', handleValue);
+
+                return () => {
+                    unsubscribeAuth();
+                    productsRef.off('value', handleValue);
+                };
+            }, []);
+
+            const handleLogin = async () => {
+                if (!loginPass) return alert("Введіть пароль!");
+                setLoginBusy(true);
+                try {
+                    await auth.signInWithEmailAndPassword(ADMIN_EMAIL, loginPass);
+                    setShowLogin(false);
+                    setLoginPass('');
+                } catch (err) {
+                    alert("Помилка входу: " + err.message);
+                } finally {
+                    setLoginBusy(false);
+                }
+            };
+
+            const handleLogout = async () => {
+                try {
+                    await auth.signOut();
+                    setShowAddForm(false);
+                    setEditingProduct(null);
+                } catch (err) {
+                    console.error("Sign-out error:", err);
+                }
+            };
+
             const handleAddProduct = async () => {
                 const images = [newItem.img1, newItem.img2, newItem.img3].filter(url => url && url.trim() !== '');
                 if (!newItem.name || !newItem.price || images.length === 0) {
@@ -458,7 +527,7 @@
                     alert("Товар успішно додано!");
                 } catch (error) {
                     console.error("Firebase Add Error:", error);
-                    alert("Помилка додавання: " + error.message + "\nПеревірте, чи ви увійшли під адміном та налаштування Firebase Rules.");
+                    alert("Помилка додавання: " + error.message);
                 }
             };
 
@@ -485,51 +554,6 @@
                         console.error("Firebase Delete Error:", error);
                         alert("Помилка видалення: " + error.message);
                     }
-                }
-            };
-
-            const handleLogout = async () => {
-                try {
-                    await auth.signOut();
-                    setShowAddForm(false);
-                    setEditingProduct(null);
-                } catch (err) {
-                    console.error("Sign-out error:", err);
-                }
-            };
-
-            const handleAddProduct = () => {
-                const images = [newItem.img1, newItem.img2, newItem.img3].filter(url => url && url.trim() !== '');
-                if (!newItem.name || !newItem.price || images.length === 0) {
-                    return alert("Заповніть назву, ціну та хоча б одне фото!");
-                }
-                
-                db.ref('products').push({
-                    name: newItem.name,
-                    price: newItem.price,
-                    oldPrice: newItem.oldPrice || '',
-                    description: newItem.description,
-                    gender: newItem.gender,
-                    images: images
-                });
-
-                setNewItem({ name: '', price: '', oldPrice: '', description: '', img1: '', img2: '', img3: '', gender: 'male' });
-                setShowAddForm(false);
-            };
-
-            const handleUpdateProduct = () => {
-                if (!editingProduct.price) return alert("Ціна не може бути порожньою!");
-                db.ref('products/' + editingProduct.id).update({
-                    price: editingProduct.price,
-                    oldPrice: editingProduct.oldPrice || '',
-                    description: editingProduct.description
-                });
-                setEditingProduct(null);
-            };
-
-            const handleDeleteProduct = (id) => {
-                if (confirm('Ви впевнені, що хочете видалити цей товар?')) {
-                    db.ref('products/' + id).remove();
                 }
             };
 
@@ -739,29 +763,29 @@
                                 <h2 className="text-2xl font-bold mb-6 text-blue-500 uppercase">Додати модель</h2>
                                 
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Назва моделі</label>
-                                <input placeholder="напр. Лофери шкіряні" className="admin-input" onChange={e => setNewItem({...newItem, name: e.target.value})} />
+                                <input placeholder="напр. Лофери шкіряні" className="admin-input" value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} />
                                 
                                 <div className="grid grid-cols-2 gap-4 mb-2">
                                     <div>
                                         <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Основна ціна (грн)</label>
-                                        <input placeholder="напр. 3499" type="number" className="admin-input" onChange={e => setNewItem({...newItem, price: e.target.value})} />
+                                        <input placeholder="напр. 3499" type="number" className="admin-input" value={newItem.price} onChange={e => setNewItem({...newItem, price: e.target.value})} />
                                     </div>
                                     <div>
                                         <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Стара ціна (якщо є знижка)</label>
-                                        <input placeholder="необов'язково" type="number" className="admin-input" onChange={e => setNewItem({...newItem, oldPrice: e.target.value})} />
+                                        <input placeholder="необов'язково" type="number" className="admin-input" value={newItem.oldPrice} onChange={e => setNewItem({...newItem, oldPrice: e.target.value})} />
                                     </div>
                                 </div>
                                 
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Опис</label>
-                                <textarea placeholder="Короткий опис матеріалів..." className="admin-input h-24" onChange={e => setNewItem({...newItem, description: e.target.value})} />
+                                <textarea placeholder="Короткий опис матеріалів..." className="admin-input h-24" value={newItem.description} onChange={e => setNewItem({...newItem, description: e.target.value})} />
                                 
-                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Посиланная на фото (URL / GitHub / Unsplash)</label>
-                                <input placeholder="URL Фото 1 (Обов'язково)" className="admin-input" onChange={e => setNewItem({...newItem, img1: e.target.value})} />
-                                <input placeholder="URL Фото 2 (Опціонально)" className="admin-input" onChange={e => setNewItem({...newItem, img2: e.target.value})} />
-                                <input placeholder="URL Фото 3 (Опціонально)" className="admin-input" onChange={e => setNewItem({...newItem, img3: e.target.value})} />
+                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Посилання на фото (URL / Unsplash / GitHub)</label>
+                                <input placeholder="URL Фото 1 (Обов'язково)" className="admin-input" value={newItem.img1} onChange={e => setNewItem({...newItem, img1: e.target.value})} />
+                                <input placeholder="URL Фото 2 (Опціонально)" className="admin-input" value={newItem.img2} onChange={e => setNewItem({...newItem, img2: e.target.value})} />
+                                <input placeholder="URL Фото 3 (Опціонально)" className="admin-input" value={newItem.img3} onChange={e => setNewItem({...newItem, img3: e.target.value})} />
                                 
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Категорія</label>
-                                <select className="admin-input" onChange={e => setNewItem({...newItem, gender: e.target.value})}>
+                                <select className="admin-input" value={newItem.gender} onChange={e => setNewItem({...newItem, gender: e.target.value})}>
                                     <option value="male">Чоловіче взуття</option>
                                     <option value="female">Жіноче взуття</option>
                                 </select>
