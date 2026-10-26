@@ -437,54 +437,54 @@
                 </div>
             );
         }
-
-        function App() {
-            const [products, setProducts] = useState([]);
-            const [filter, setFilter] = useState('all');
-            const [selectedProduct, setSelectedProduct] = useState(null);
-            const [editingProduct, setEditingProduct] = useState(null);
-            const [isAdmin, setIsAdmin] = useState(false);
-            const [showAddForm, setShowAddForm] = useState(false);
-            const [loginPass, setLoginPass] = useState('');
-            const [showLogin, setShowLogin] = useState(false);
-            const [loginBusy, setLoginBusy] = useState(false);
-            const [newItem, setNewItem] = useState({ name: '', price: '', oldPrice: '', description: '', img1: '', img2: '', img3: '', gender: 'male' });
-
-            const phone = "380673485909";
-
-            useEffect(() => {
-                const productsRef = db.ref('products');
-                productsRef.on('value', (snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        const list = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-                        setProducts(list);
-                    } else { 
-                        // Fallback to sample data if Firebase is completely empty
-                        setProducts(SAMPLE_PRODUCTS); 
-                    }
-                });
-                return () => productsRef.off();
-            }, []);
-
-            useEffect(() => {
-                return auth.onAuthStateChanged((user) => {
-                    setIsAdmin(!!user && user.email === ADMIN_EMAIL);
-                });
-            }, []);
-
-            const handleLogin = async () => {
-                if (!loginPass || loginBusy) return;
-                setLoginBusy(true);
+            const handleAddProduct = async () => {
+                const images = [newItem.img1, newItem.img2, newItem.img3].filter(url => url && url.trim() !== '');
+                if (!newItem.name || !newItem.price || images.length === 0) {
+                    return alert("Заповніть назву, ціну та хоча б перше фото!");
+                }
+                
                 try {
-                    await auth.signInWithEmailAndPassword(ADMIN_EMAIL, loginPass);
-                    setShowLogin(false);
-                    setLoginPass('');
-                } catch (err) {
-                    console.error("Auth error:", err);
-                    alert('Невірний пароль!');
-                } finally {
-                    setLoginBusy(false);
+                    await db.ref('products').push({
+                        name: newItem.name,
+                        price: newItem.price,
+                        oldPrice: newItem.oldPrice || '',
+                        description: newItem.description || '',
+                        gender: newItem.gender || 'male',
+                        images: images
+                    });
+
+                    setNewItem({ name: '', price: '', oldPrice: '', description: '', img1: '', img2: '', img3: '', gender: 'male' });
+                    setShowAddForm(false);
+                    alert("Товар успішно додано!");
+                } catch (error) {
+                    console.error("Firebase Add Error:", error);
+                    alert("Помилка додавання: " + error.message + "\nПеревірте, чи ви увійшли під адміном та налаштування Firebase Rules.");
+                }
+            };
+
+            const handleUpdateProduct = async () => {
+                if (!editingProduct.price) return alert("Ціна не може бути порожньою!");
+                try {
+                    await db.ref('products/' + editingProduct.id).update({
+                        price: editingProduct.price,
+                        oldPrice: editingProduct.oldPrice || '',
+                        description: editingProduct.description || ''
+                    });
+                    setEditingProduct(null);
+                } catch (error) {
+                    console.error("Firebase Update Error:", error);
+                    alert("Помилка оновлення: " + error.message);
+                }
+            };
+
+            const handleDeleteProduct = async (id) => {
+                if (confirm('Ви впевнені, що хочете видалити цей товар?')) {
+                    try {
+                        await db.ref('products/' + id).remove();
+                    } catch (error) {
+                        console.error("Firebase Delete Error:", error);
+                        alert("Помилка видалення: " + error.message);
+                    }
                 }
             };
 
