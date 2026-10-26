@@ -666,8 +666,8 @@
 
                     {/* Modal Edit Product */}
                     {editingProduct && (
-                        <div className="fixed inset-0 z-[400] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
-                            <div className="bg-[#121215] p-8 rounded-3xl border border-blue-500/40 w-full max-w-lg shadow-2xl">
+                        <div className="fixed inset-0 z-[400] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+                            <div className="bg-[#121215] p-8 rounded-3xl border border-blue-500/40 w-full max-w-lg shadow-2xl my-8">
                                 <h2 className="text-2xl font-bold mb-6 text-blue-500 uppercase">Редагувати дані</h2>
                                 
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Назва моделі</label>
@@ -679,20 +679,21 @@
 
                                 <div className="grid grid-cols-2 gap-4 mb-2">
                                     <div>
-                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Ціна (₴)</label>
+                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Акційна ціна (грн) *</label>
                                         <input 
                                             value={editingProduct.price} 
                                             type="number" 
+                                            placeholder="напр. 2800"
                                             className="admin-input" 
                                             onChange={e => setEditingProduct({...editingProduct, price: e.target.value})} 
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Стара ціна (для знижки)</label>
+                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Стара ціна (без знижки)</label>
                                         <input 
                                             value={editingProduct.oldPrice || ''} 
                                             type="number" 
-                                            placeholder="напр. 3999"
+                                            placeholder="напр. 3500"
                                             className="admin-input" 
                                             onChange={e => setEditingProduct({...editingProduct, oldPrice: e.target.value})} 
                                         />
@@ -712,8 +713,40 @@
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Опис</label>
                                 <textarea 
                                     value={editingProduct.description} 
-                                    className="admin-input h-32" 
+                                    className="admin-input h-24" 
                                     onChange={e => setEditingProduct({...editingProduct, description: e.target.value})} 
+                                />
+
+                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Посилання на фото (URL)</label>
+                                <input 
+                                    placeholder="Фото 1"
+                                    value={editingProduct.images && editingProduct.images[0] ? editingProduct.images[0] : ''} 
+                                    className="admin-input" 
+                                    onChange={e => {
+                                        const imgs = [...(editingProduct.images || [])];
+                                        imgs[0] = e.target.value;
+                                        setEditingProduct({...editingProduct, images: imgs});
+                                    }} 
+                                />
+                                <input 
+                                    placeholder="Фото 2"
+                                    value={editingProduct.images && editingProduct.images[1] ? editingProduct.images[1] : ''} 
+                                    className="admin-input" 
+                                    onChange={e => {
+                                        const imgs = [...(editingProduct.images || [])];
+                                        imgs[1] = e.target.value;
+                                        setEditingProduct({...editingProduct, images: imgs});
+                                    }} 
+                                />
+                                <input 
+                                    placeholder="Фото 3"
+                                    value={editingProduct.images && editingProduct.images[2] ? editingProduct.images[2] : ''} 
+                                    className="admin-input" 
+                                    onChange={e => {
+                                        const imgs = [...(editingProduct.images || [])];
+                                        imgs[2] = e.target.value;
+                                        setEditingProduct({...editingProduct, images: imgs});
+                                    }} 
                                 />
 
                                 <div className="flex gap-4 mt-4">
