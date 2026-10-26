@@ -265,11 +265,6 @@
 
             useEffect(() => {
                 setIsLoaded(false);
-                if (product.images && product.images.length > 1) {
-                    const nextIndex = (currentImg + 1) % product.images.length;
-                    const img = new Image();
-                    img.src = product.images[nextIndex];
-                }
             }, [currentImg, product.images]);
 
             const next = useCallback((e) => { 
@@ -323,7 +318,7 @@
                         <img 
                             src={product.images && product.images.length > 0 ? product.images[currentImg] : 'https://via.placeholder.com/600x600?text=Немає+фото'} 
                             onLoad={() => setIsLoaded(true)}
-                            className={`w-full h-full object-cover transition-opacity duration-500 will-change-transform ${isLoaded ? 'opacity-100' : 'opacity-0'}`} 
+                            className={`w-full h-full object-cover transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`} 
                             alt={product.name}
                         />
 
@@ -449,6 +444,7 @@
             const [loginBusy, setLoginBusy] = useState(false);
 
             const [showAddForm, setShowAddForm] = useState(false);
+            const [isSubmitting, setIsSubmitting] = useState(false);
             const [newItem, setNewItem] = useState({
                 name: '', price: '', oldPrice: '', description: '', img1: '', img2: '', img3: '', gender: 'male'
             });
@@ -474,7 +470,10 @@
                     }
                 };
 
-                productsRef.on('value', handleValue);
+                productsRef.on('value', handleValue, (err) => {
+                    console.error("Firebase read error:", err);
+                    setProducts(SAMPLE_PRODUCTS);
+                });
 
                 return () => {
                     unsubscribeAuth();
@@ -507,19 +506,26 @@
             };
 
             const handleAddProduct = async () => {
-                const images = [newItem.img1, newItem.img2, newItem.img3].filter(url => url && url.trim() !== '');
-                if (!newItem.name || !newItem.price || images.length === 0) {
-                    return alert("Заповніть назву, ціну та хоча б перше фото!");
-                }
+                const images = [newItem.img1, newItem.img2, newItem.img3]
+                    .map(img => img ? img.trim() : '')
+                    .filter(url => url !== '');
+
+                if (!newItem.name.trim()) return alert("Будь ласка, вкажіть назву товару!");
+                if (!newItem.price.trim()) return alert("Будь ласка, вкажіть ціну товару!");
+                if (images.length === 0) return alert("Будь ласка, вкажіть хоча б одне посилання на фото (Фото 1)!");
+
+                setIsSubmitting(true);
                 
                 try {
-                    await db.ref('products').push({
-                        name: newItem.name,
-                        price: newItem.price,
-                        oldPrice: newItem.oldPrice || '',
-                        description: newItem.description || '',
+                    const newRef = db.ref('products').push();
+                    await newRef.set({
+                        name: newItem.name.trim(),
+                        price: newItem.price.trim(),
+                        oldPrice: newItem.oldPrice ? newItem.oldPrice.trim() : '',
+                        description: newItem.description ? newItem.description.trim() : '',
                         gender: newItem.gender || 'male',
-                        images: images
+                        images: images,
+                        createdAt: Date.now()
                     });
 
                     setNewItem({ name: '', price: '', oldPrice: '', description: '', img1: '', img2: '', img3: '', gender: 'male' });
@@ -527,7 +533,9 @@
                     alert("Товар успішно додано!");
                 } catch (error) {
                     console.error("Firebase Add Error:", error);
-                    alert("Помилка додавання: " + error.message);
+                    alert("Помилка додавання: " + error.message + "\n\nПеревірте правила доступу Realtime Database в консолі Firebase!");
+                } finally {
+                    setIsSubmitting(false);
                 }
             };
 
@@ -535,11 +543,14 @@
                 if (!editingProduct.price) return alert("Ціна не може бути порожньою!");
                 try {
                     await db.ref('products/' + editingProduct.id).update({
+                        name: editingProduct.name,
                         price: editingProduct.price,
                         oldPrice: editingProduct.oldPrice || '',
-                        description: editingProduct.description || ''
+                        description: editingProduct.description || '',
+                        gender: editingProduct.gender || 'male'
                     });
                     setEditingProduct(null);
+                    alert("Зміни успішно збережено!");
                 } catch (error) {
                     console.error("Firebase Update Error:", error);
                     alert("Помилка оновлення: " + error.message);
@@ -547,7 +558,7 @@
             };
 
             const handleDeleteProduct = async (id) => {
-                if (confirm('Ви впевнені, що хочете видалити цей товар?')) {
+                if (window.confirm('Ви впевнені, що хочете видалити цей товар?')) {
                     try {
                         await db.ref('products/' + id).remove();
                     } catch (error) {
@@ -646,11 +657,17 @@
                         <div className="fixed inset-0 z-[400] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
                             <div className="bg-[#121215] p-8 rounded-3xl border border-blue-500/40 w-full max-w-lg shadow-2xl">
                                 <h2 className="text-2xl font-bold mb-6 text-blue-500 uppercase">Редагувати дані</h2>
-                                <p className="text-gray-400 mb-4 font-bold">{editingProduct.name}</p>
+                                
+                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Назва моделі</label>
+                                <input 
+                                    value={editingProduct.name} 
+                                    className="admin-input" 
+                                    onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} 
+                                />
 
                                 <div className="grid grid-cols-2 gap-4 mb-2">
                                     <div>
-                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Акційна ціна (₴)</label>
+                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Ціна (₴)</label>
                                         <input 
                                             value={editingProduct.price} 
                                             type="number" 
@@ -659,7 +676,7 @@
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Стара ціна (₴)</label>
+                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Стара ціна (для знижки)</label>
                                         <input 
                                             value={editingProduct.oldPrice || ''} 
                                             type="number" 
@@ -669,6 +686,16 @@
                                         />
                                     </div>
                                 </div>
+
+                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Категорія</label>
+                                <select 
+                                    className="admin-input" 
+                                    value={editingProduct.gender || 'male'} 
+                                    onChange={e => setEditingProduct({...editingProduct, gender: e.target.value})}
+                                >
+                                    <option value="male">Чоловіче взуття</option>
+                                    <option value="female">Жіноче взуття</option>
+                                </select>
 
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Опис</label>
                                 <textarea 
@@ -762,37 +789,89 @@
                             <div className="bg-[#121215] p-8 rounded-3xl border border-white/10 w-full max-w-lg my-8">
                                 <h2 className="text-2xl font-bold mb-6 text-blue-500 uppercase">Додати модель</h2>
                                 
-                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Назва моделі</label>
-                                <input placeholder="напр. Лофери шкіряні" className="admin-input" value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} />
+                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Назва моделі *</label>
+                                <input 
+                                    placeholder="напр. Лофери шкіряні" 
+                                    className="admin-input" 
+                                    value={newItem.name} 
+                                    onChange={e => setNewItem({...newItem, name: e.target.value})} 
+                                />
                                 
                                 <div className="grid grid-cols-2 gap-4 mb-2">
                                     <div>
-                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Основна ціна (грн)</label>
-                                        <input placeholder="напр. 3499" type="number" className="admin-input" value={newItem.price} onChange={e => setNewItem({...newItem, price: e.target.value})} />
+                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Ціна (грн) *</label>
+                                        <input 
+                                            placeholder="напр. 3499" 
+                                            type="number" 
+                                            className="admin-input" 
+                                            value={newItem.price} 
+                                            onChange={e => setNewItem({...newItem, price: e.target.value})} 
+                                        />
                                     </div>
                                     <div>
-                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Стара ціна (якщо є знижка)</label>
-                                        <input placeholder="необов'язково" type="number" className="admin-input" value={newItem.oldPrice} onChange={e => setNewItem({...newItem, oldPrice: e.target.value})} />
+                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Стара ціна (необов'язково)</label>
+                                        <input 
+                                            placeholder="напр. 3999" 
+                                            type="number" 
+                                            className="admin-input" 
+                                            value={newItem.oldPrice} 
+                                            onChange={e => setNewItem({...newItem, oldPrice: e.target.value})} 
+                                        />
                                     </div>
                                 </div>
                                 
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Опис</label>
-                                <textarea placeholder="Короткий опис матеріалів..." className="admin-input h-24" value={newItem.description} onChange={e => setNewItem({...newItem, description: e.target.value})} />
+                                <textarea 
+                                    placeholder="Короткий опис матеріалів та підошви..." 
+                                    className="admin-input h-24" 
+                                    value={newItem.description} 
+                                    onChange={e => setNewItem({...newItem, description: e.target.value})} 
+                                />
                                 
-                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Посилання на фото (URL / Unsplash / GitHub)</label>
-                                <input placeholder="URL Фото 1 (Обов'язково)" className="admin-input" value={newItem.img1} onChange={e => setNewItem({...newItem, img1: e.target.value})} />
-                                <input placeholder="URL Фото 2 (Опціонально)" className="admin-input" value={newItem.img2} onChange={e => setNewItem({...newItem, img2: e.target.value})} />
-                                <input placeholder="URL Фото 3 (Опціонально)" className="admin-input" value={newItem.img3} onChange={e => setNewItem({...newItem, img3: e.target.value})} />
+                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Посилання на фото (URL)</label>
+                                <input 
+                                    placeholder="URL Фото 1 (Обов'язково) *" 
+                                    className="admin-input" 
+                                    value={newItem.img1} 
+                                    onChange={e => setNewItem({...newItem, img1: e.target.value})} 
+                                />
+                                <input 
+                                    placeholder="URL Фото 2 (Опціонально)" 
+                                    className="admin-input" 
+                                    value={newItem.img2} 
+                                    onChange={e => setNewItem({...newItem, img2: e.target.value})} 
+                                />
+                                <input 
+                                    placeholder="URL Фото 3 (Опціонально)" 
+                                    className="admin-input" 
+                                    value={newItem.img3} 
+                                    onChange={e => setNewItem({...newItem, img3: e.target.value})} 
+                                />
                                 
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Категорія</label>
-                                <select className="admin-input" value={newItem.gender} onChange={e => setNewItem({...newItem, gender: e.target.value})}>
+                                <select 
+                                    className="admin-input" 
+                                    value={newItem.gender} 
+                                    onChange={e => setNewItem({...newItem, gender: e.target.value})}
+                                >
                                     <option value="male">Чоловіче взуття</option>
                                     <option value="female">Жіноче взуття</option>
                                 </select>
                                 
                                 <div className="flex gap-4 mt-4">
-                                    <button onClick={handleAddProduct} className="flex-1 bg-blue-600 hover:bg-blue-500 py-3.5 rounded-xl font-bold text-white transition">ЗБЕРЕГТИ</button>
-                                    <button onClick={() => setShowAddForm(false)} className="flex-1 bg-white/5 hover:bg-white/10 py-3.5 rounded-xl font-bold text-gray-300 transition">СКАСУВАТИ</button>
+                                    <button 
+                                        onClick={handleAddProduct} 
+                                        disabled={isSubmitting}
+                                        className="flex-1 bg-blue-600 hover:bg-blue-500 py-3.5 rounded-xl font-bold text-white transition disabled:opacity-50"
+                                    >
+                                        {isSubmitting ? 'Збереження...' : 'ЗБЕРЕГТИ'}
+                                    </button>
+                                    <button 
+                                        onClick={() => setShowAddForm(false)} 
+                                        className="flex-1 bg-white/5 hover:bg-white/10 py-3.5 rounded-xl font-bold text-gray-300 transition"
+                                    >
+                                        СКАСУВАТИ
+                                    </button>
                                 </div>
                             </div>
                         </div>
