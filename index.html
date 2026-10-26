@@ -20,6 +20,7 @@
 
     <!-- Firebase SDK (Compat Version) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
     <style>
@@ -189,18 +190,11 @@
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
-        const db = firebase.database(); 
+        const db = firebase.database();
+        const auth = firebase.auth();
 
-        // SHA-256 hash for admin authentication (corresponds to password secret)
-        const ADMIN_PASSWORD_HASH = "b845d41c888ee2a90eebe8e70bc579b128509831d04eb589574ca982635a9675"; // Example SHA-256 hash
-
-        // Helper function to calculate SHA-256 hash of a string
-        async function hashPassword(message) {
-            const msgUint8 = new TextEncoder().encode(message);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
+        // Only an identifier for Firebase Auth — not a secret. Password lives in Firebase Console.
+        const ADMIN_EMAIL = "admin@crozali.local";
 
         // Initial Sample Demo Data (used when Database is empty)
         const SAMPLE_PRODUCTS = [
@@ -397,6 +391,7 @@
             const [showAddForm, setShowAddForm] = useState(false);
             const [loginPass, setLoginPass] = useState('');
             const [showLogin, setShowLogin] = useState(false);
+            const [loginBusy, setLoginBusy] = useState(false);
             const [newItem, setNewItem] = useState({ name: '', price: '', description: '', img1: '', img2: '', img3: '', gender: 'male' });
 
             const phone = "380673485909";
@@ -416,21 +411,34 @@
                 return () => productsRef.off();
             }, []);
 
-            // Handle Admin Login with secure SHA-256 password hash comparison
+            useEffect(() => {
+                return auth.onAuthStateChanged((user) => {
+                    setIsAdmin(!!user && user.email === ADMIN_EMAIL);
+                });
+            }, []);
+
             const handleLogin = async () => {
-                if (!loginPass) return;
+                if (!loginPass || loginBusy) return;
+                setLoginBusy(true);
                 try {
-                    const hashedInput = await hashPassword(loginPass);
-                    if (hashedInput === ADMIN_PASSWORD_HASH || loginPass === "653160") {
-                        setIsAdmin(true);
-                        setShowLogin(false);
-                        setLoginPass('');
-                    } else {
-                        alert('Невірний пароль!');
-                    }
+                    await auth.signInWithEmailAndPassword(ADMIN_EMAIL, loginPass);
+                    setShowLogin(false);
+                    setLoginPass('');
                 } catch (err) {
-                    console.error("Hashing error:", err);
-                    alert('Помилка авторизації.');
+                    console.error("Auth error:", err);
+                    alert('Невірний пароль!');
+                } finally {
+                    setLoginBusy(false);
+                }
+            };
+
+            const handleLogout = async () => {
+                try {
+                    await auth.signOut();
+                    setShowAddForm(false);
+                    setEditingProduct(null);
+                } catch (err) {
+                    console.error("Sign-out error:", err);
                 }
             };
 
@@ -627,7 +635,7 @@
 
                     {/* Admin Access Button */}
                     <button 
-                        onClick={() => isAdmin ? setIsAdmin(false) : setShowLogin(true)} 
+                        onClick={() => isAdmin ? handleLogout() : setShowLogin(true)} 
                         className="fixed bottom-6 right-6 z-[100] bg-white/10 backdrop-blur-md px-4 py-3 rounded-full text-xs uppercase font-bold border border-white/20 hover:bg-blue-600 transition shadow-lg"
                     >
                         {isAdmin ? 'Вийти з Адмінки' : '🔑 Admin'}
@@ -646,7 +654,7 @@
                                     onChange={e => setLoginPass(e.target.value)}
                                     onKeyDown={e => e.key === 'Enter' && handleLogin()}
                                 />
-                                <button onClick={handleLogin} className="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold text-white transition mb-2">Увійти</button>
+                                <button onClick={handleLogin} disabled={loginBusy} className="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold text-white transition mb-2 disabled:opacity-50">{loginBusy ? 'Вхід...' : 'Увійти'}</button>
                                 <button onClick={() => setShowLogin(false)} className="w-full text-gray-400 hover:text-white text-xs py-2">Скасувати</button>
                             </div>
                         </div>
