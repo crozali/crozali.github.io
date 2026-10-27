@@ -172,17 +172,17 @@
         const ADMIN_EMAIL = "admin@crozali.local";
 
         const FEMALE_TYPES = ["Жіночі лофери", "Жіночі кеди", "Жіночі кросівки", "Жіночі туфлі", "Жіночі Конверси", "Жіночі каблуки", "Жіночі Снікерси"];
-        const MALE_TYPES = ["Чоловічі кеди", "Чоловічі монкі", "Чоловічі туфлі", "Чоловічі кросівки"];
+        const MALE_TYPES = ["Чоловічі кеди", "Чоловічі монкі", "Чоловічі туфлі", "Чоловічі кросівки", "Чоловічі лофери"];
 
         const SAMPLE_PRODUCTS = [
             {
                 id: "demo1",
-                name: "Чоловічі Монкі Classic Black",
+                name: "Чоловічі Лофери Classic Black",
                 price: "3499",
                 oldPrice: "3999",
                 gender: "male",
-                shoeType: "Чоловічі монкі",
-                description: "Преміальна натуральна шкіра гладкої фактури. Зручні ремінці та зносостійка підошва.",
+                shoeType: "Чоловічі лофери",
+                description: "Преміальна натуральна шкіра гладкої фактури. Зручні та зносостійкі.",
                 images: ["https://images.unsplash.com/photo-1638247025967-b4e38f787b76?w=800&auto=format&fit=crop&q=60"]
             },
             {
@@ -217,22 +217,26 @@
         // Функція розумного автовизначення типу взуття та статі за назвою
         const detectShoeCategory = (name) => {
             const lower = name.toLowerCase();
-            if (lower.includes('лофер')) return { type: 'Жіночі лофери', gender: 'female' };
+            const isMale = lower.includes('чолов');
+            
+            if (lower.includes('лофер')) {
+                return isMale ? { type: 'Чоловічі лофери', gender: 'male' } : { type: 'Жіночі лофери', gender: 'female' };
+            }
             if (lower.includes('монк')) return { type: 'Чоловічі монкі', gender: 'male' };
             if (lower.includes('конверс')) return { type: 'Жіночі Конверси', gender: 'female' };
             if (lower.includes('каблук')) return { type: 'Жіночі каблуки', gender: 'female' };
             
             if (lower.includes('снікерс') || lower.includes('снекерс')) {
-                return lower.includes('чолов') ? { type: 'Чоловічі кросівки', gender: 'male' } : { type: 'Жіночі Снікерси', gender: 'female' };
+                return isMale ? { type: 'Чоловічі кросівки', gender: 'male' } : { type: 'Жіночі Снікерси', gender: 'female' };
             }
             if (lower.includes('кед')) {
-                return lower.includes('чолов') ? { type: 'Чоловічі кеди', gender: 'male' } : { type: 'Жіночі кеди', gender: 'female' };
+                return isMale ? { type: 'Чоловічі кеди', gender: 'male' } : { type: 'Жіночі кеди', gender: 'female' };
             }
             if (lower.includes('кросівк')) {
-                return lower.includes('чолов') ? { type: 'Чоловічі кросівки', gender: 'male' } : { type: 'Жіночі кросівки', gender: 'female' };
+                return isMale ? { type: 'Чоловічі кросівки', gender: 'male' } : { type: 'Жіночі кросівки', gender: 'female' };
             }
             if (lower.includes('туфл')) {
-                return lower.includes('чолов') ? { type: 'Чоловічі туфлі', gender: 'male' } : { type: 'Жіночі туфлі', gender: 'female' };
+                return isMale ? { type: 'Чоловічі туфлі', gender: 'male' } : { type: 'Жіночі туфлі', gender: 'female' };
             }
             return null;
         };
@@ -451,7 +455,6 @@
                 };
             }, []);
 
-            // Обробник зміни імені для нового товару (розумна автосинхронизація)
             const handleNewItemNameChange = (val) => {
                 const detected = detectShoeCategory(val);
                 setNewItem(prev => ({
@@ -461,7 +464,6 @@
                 }));
             };
 
-            // Обробник зміни імені для редагованого товару
             const handleEditItemNameChange = (val) => {
                 const detected = detectShoeCategory(val);
                 setEditingProduct(prev => ({
@@ -874,7 +876,7 @@
                                 
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Назва моделі (автовизначення типу) *</label>
                                 <input 
-                                    placeholder="напр. Жіночі лофери Classic" 
+                                    placeholder="напр. Чоловічі лофери Classic" 
                                     className="admin-input" 
                                     value={newItem.name} 
                                     onChange={e => handleNewItemNameChange(e.target.value)} 
