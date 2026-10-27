@@ -53,26 +53,20 @@
             opacity: 0.85;
         }
 
-        /* Smooth Scrolling */
-        html {
-            scroll-behavior: smooth;
-        }
+        html { scroll-behavior: smooth; }
 
-        /* Glassmorphism Navigation */
         .nav-blur {
             background: rgba(10, 10, 12, 0.8);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        /* Gradient Text */
         .gradient-text {
             background: linear-gradient(135deg, #ffffff 0%, #3b82f6 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        /* Skeleton Loading Animation */
         .skeleton {
             background: linear-gradient(90deg, #18181b 25%, #27272a 50%, #18181b 75%);
             background-size: 200% 100%;
@@ -84,7 +78,6 @@
             100% { background-position: -200% 0; }
         }
 
-        /* Product Card & Modal UI Styles */
         .product-card {
             background: #121215;
             border: 1px solid rgba(255, 255, 255, 0.06);
@@ -137,20 +130,7 @@
             transition: border-color 0.2s;
         }
 
-        .admin-input:focus {
-            border-color: #3b82f6;
-        }
-
-        /* File Upload Button Styling */
-        .file-upload-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px dashed rgba(255, 255, 255, 0.2);
-            transition: all 0.2s ease;
-        }
-        .file-upload-btn:hover {
-            border-color: #3b82f6;
-            background: rgba(59, 130, 246, 0.1);
-        }
+        .admin-input:focus { border-color: #3b82f6; }
 
         .social-icon {
             background: rgba(255, 255, 255, 0.05);
@@ -164,7 +144,6 @@
             background: rgba(59, 130, 246, 0.1);
         }
 
-        /* Discount Badges */
         .badge-yellow {
             background: #eab308;
             color: #000000;
@@ -177,20 +156,10 @@
             box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0a0a0c;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #27272a;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #3b82f6;
-        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0a0c; }
+        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
     </style>
 </head>
 <body>
@@ -200,7 +169,6 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo, useCallback } = React;
 
-        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBSmzapB-gtDeQNVq-M7GuJFPoXf2_94aU",
             authDomain: "crozali-shop.firebaseapp.com",
@@ -220,47 +188,43 @@
 
         const ADMIN_EMAIL = "admin@crozali.local";
 
-        // Initial Sample Demo Data (used when Database is empty)
+        // Списки категорій для вибору
+        const FEMALE_TYPES = ["Жіночі лофери", "Жіночі кеди", "Жіночі кросівки", "Жіночі туфлі", "Жіночі Конверси", "Жіночі каблуки", "Жіночі Снікерси"];
+        const MALE_TYPES = ["Чоловічі кеди", "Чоловічі монкі", "Чоловічі туфлі", "Чоловічі кросівки"];
+
         const SAMPLE_PRODUCTS = [
             {
                 id: "demo1",
-                name: "Шкіряні Челсі Classic Black",
+                name: "Чоловічі Монкі Classic Black",
                 price: "3499",
                 oldPrice: "3999",
                 gender: "male",
-                description: "Преміальна натуральна шкіра гладкої фактури. Зручні еластичні вставки та зносостійка підошва. Ідеально для повсякденного носіння та ділового стилю.",
-                images: [
-                    "https://images.unsplash.com/photo-1638247025967-b4e38f787b76?w=800&auto=format&fit=crop&q=60",
-                    "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800&auto=format&fit=crop&q=60"
-                ]
+                shoeType: "Чоловічі монкі",
+                description: "Преміальна натуральна шкіра гладкої фактури. Зручні ремінці та зносостійка підошва.",
+                images: ["https://images.unsplash.com/photo-1638247025967-b4e38f787b76?w=800&auto=format&fit=crop&q=60"]
             },
             {
                 id: "demo2",
-                name: "Жіночі Шкіряні Черевики Urban",
+                name: "Жіночі Лофери Urban Leather",
                 price: "2499",
-                oldPrice: "3299",
+                oldPrice: "3125",
                 gender: "female",
-                description: "Ніжна шкіра теляти, байкова утеплена підкладка та масивна тракторна підошва. Комфортна колодка для прогулянок містом.",
-                images: [
-                    "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800&auto=format&fit=crop&q=60",
-                    "https://images.unsplash.com/photo-1515347619252-60a4bf4fff4f?w=800&auto=format&fit=crop&q=60"
-                ]
+                shoeType: "Жіночі лофери",
+                description: "Ніжна шкіра теляти, стильна та комфортна колодка для прогулянок містом.",
+                images: ["https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800&auto=format&fit=crop&q=60"]
             },
             {
                 id: "demo3",
-                name: "Чоловічі Лофери Premium Leather",
+                name: "Чоловічі Кросівки Sport Leather",
                 price: "2999",
                 oldPrice: "",
                 gender: "male",
-                description: "Ручна робота, 100% натуральна шкіра преміум класу. Шкіряна устілка з анатомічною підтримкою.",
-                images: [
-                    "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=800&auto=format&fit=crop&q=60",
-                    "https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=800&auto=format&fit=crop&q=60"
-                ]
+                shoeType: "Чоловічі кросівки",
+                description: "Натуральна шкіра, анатимочна устілка, легка підошва.",
+                images: ["https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=800&auto=format&fit=crop&q=60"]
             }
         ];
 
-        // Helper function to calculate discount percentage
         const calcDiscount = (price, oldPrice) => {
             const p = parseFloat(String(price).replace(/\s+/g, ''));
             const op = parseFloat(String(oldPrice).replace(/\s+/g, ''));
@@ -274,9 +238,7 @@
 
             const discountPercent = calcDiscount(product.price, product.oldPrice);
 
-            useEffect(() => {
-                setIsLoaded(false);
-            }, [currentImg, product.images]);
+            useEffect(() => { setIsLoaded(false); }, [currentImg, product.images]);
 
             const next = useCallback((e) => { 
                 e.stopPropagation();
@@ -292,7 +254,6 @@
 
             return (
                 <div onClick={() => onOpen(product)} className="product-card rounded-3xl overflow-hidden flex flex-col h-full group relative cursor-pointer">
-                    {/* Discount Badge */}
                     {discountPercent > 0 && (
                         <div className={`absolute top-4 left-4 z-30 px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase ${discountPercent <= 20 ? 'badge-yellow' : 'badge-red'}`}>
                             -{discountPercent}%
@@ -301,20 +262,8 @@
 
                     {isAdmin && (
                         <div className="absolute top-4 right-4 z-[60] flex gap-2">
-                            <button 
-                                title="Редагувати"
-                                onClick={(e) => { e.stopPropagation(); onEdit(product); }} 
-                                className="bg-blue-600/90 hover:bg-blue-600 w-9 h-9 rounded-full flex items-center justify-center font-bold text-white shadow-lg hover:scale-110 transition"
-                            >
-                                ✎
-                            </button>
-                            <button 
-                                title="Видалити"
-                                onClick={(e) => { e.stopPropagation(); onDelete(product.id); }} 
-                                className="bg-red-600/90 hover:bg-red-600 w-9 h-9 rounded-full flex items-center justify-center font-bold text-white shadow-lg hover:scale-110 transition"
-                            >
-                                ✕
-                            </button>
+                            <button title="Редагувати" onClick={(e) => { e.stopPropagation(); onEdit(product); }} className="bg-blue-600/90 hover:bg-blue-600 w-9 h-9 rounded-full flex items-center justify-center font-bold text-white shadow-lg hover:scale-110 transition">✎</button>
+                            <button title="Видалити" onClick={(e) => { e.stopPropagation(); onDelete(product.id); }} className="bg-red-600/90 hover:bg-red-600 w-9 h-9 rounded-full flex items-center justify-center font-bold text-white shadow-lg hover:scale-110 transition">✕</button>
                         </div>
                     )}
 
@@ -339,7 +288,6 @@
                                     <button onClick={prev} className="slider-btn pointer-events-auto w-9 h-9 rounded-full text-white flex items-center justify-center shadow-lg">❮</button>
                                     <button onClick={next} className="slider-btn pointer-events-auto w-9 h-9 rounded-full text-white flex items-center justify-center shadow-lg">❯</button>
                                 </div>
-
                                 <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center gap-1.5 pointer-events-none">
                                     {product.images.map((_, idx) => (
                                         <div key={idx} className={`indicator-dot ${idx === currentImg ? 'indicator-active' : 'indicator-inactive'}`}></div>
@@ -350,14 +298,15 @@
                     </div>
 
                     <div className="p-6 flex flex-col flex-grow text-left">
+                        {product.shoeType && (
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-400 mb-1">{product.shoeType}</span>
+                        )}
                         <h3 className="text-xl font-bold mb-2 group-hover:text-blue-400 transition-colors">{product.name}</h3>
                         <p className="text-gray-400 text-sm mb-6 flex-grow line-clamp-2 leading-relaxed">{product.description}</p>
                         <div className="flex justify-between items-end mt-auto pt-4 border-t border-white/5">
                             <div className="flex items-baseline gap-2 flex-wrap">
                                 {product.oldPrice && parseFloat(String(product.oldPrice).replace(/\s+/g, '')) > parseFloat(String(product.price).replace(/\s+/g, '')) && (
-                                    <span className="text-sm font-semibold text-gray-500 line-through">
-                                        {product.oldPrice} ₴
-                                    </span>
+                                    <span className="text-sm font-semibold text-gray-500 line-through">{product.oldPrice} ₴</span>
                                 )}
                                 <span className="text-2xl font-black text-blue-500">{product.price} ₴</span>
                             </div>
@@ -411,12 +360,13 @@
                         </div>
 
                         <div className="w-full md:w-2/5 p-8 flex flex-col overflow-y-auto">
+                            {product.shoeType && (
+                                <span className="text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">{product.shoeType}</span>
+                            )}
                             <h2 className="text-3xl font-black mb-3 leading-tight">{product.name}</h2>
                             <div className="flex items-baseline gap-3 mb-6">
                                 {product.oldPrice && parseFloat(String(product.oldPrice).replace(/\s+/g, '')) > parseFloat(String(product.price).replace(/\s+/g, '')) && (
-                                    <span className="text-lg font-semibold text-gray-500 line-through">
-                                        {product.oldPrice} ₴
-                                    </span>
+                                    <span className="text-lg font-semibold text-gray-500 line-through">{product.oldPrice} ₴</span>
                                 )}
                                 <div className="text-3xl font-black text-blue-500">{product.price} ₴</div>
                             </div>
@@ -445,7 +395,12 @@
 
         function App() {
             const [products, setProducts] = useState([]);
-            const [filter, setFilter] = useState('all');
+            
+            // Фільтри та Сортування
+            const [genderFilter, setGenderFilter] = useState('all');
+            const [subTypeFilter, setSubTypeFilter] = useState('all');
+            const [sortBy, setSortBy] = useState('default'); // 'default', 'price-asc', 'price-desc', 'discount'
+            
             const [selectedProduct, setSelectedProduct] = useState(null);
             const [editingProduct, setEditingProduct] = useState(null);
             
@@ -457,34 +412,10 @@
             const [showAddForm, setShowAddForm] = useState(false);
             const [isSubmitting, setIsSubmitting] = useState(false);
             const [newItem, setNewItem] = useState({
-                name: '', price: '', oldPrice: '', description: '', img1: '', img2: '', img3: '', gender: 'male'
+                name: '', price: '', oldPrice: '', description: '', img1: '', img2: '', img3: '', gender: 'male', shoeType: MALE_TYPES[0]
             });
 
             const phone = "380673485909";
-
-            // Helper to convert selected image file to Base64 String
-            const handleFileUpload = (e, targetField, isEditMode = false) => {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                if (file.size > 2 * 1024 * 1024) {
-                    alert("Розмір файлу перевищує 2MB. Будь ласка, оберіть менший файл!");
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    const result = reader.result;
-                    if (isEditMode) {
-                        const imgs = [...(editingProduct.images || [])];
-                        imgs[targetField] = result;
-                        setEditingProduct(prev => ({ ...prev, images: imgs }));
-                    } else {
-                        setNewItem(prev => ({ ...prev, [targetField]: result }));
-                    }
-                };
-                reader.readAsDataURL(file);
-            };
 
             useEffect(() => {
                 const unsubscribeAuth = auth.onAuthStateChanged(user => {
@@ -515,6 +446,17 @@
                     productsRef.off('value', handleValue);
                 };
             }, []);
+
+            // Автозміна вибору типу при зміні статі в адмінці
+            const handleGenderChangeNewItem = (g) => {
+                const defaultType = g === 'female' ? FEMALE_TYPES[0] : MALE_TYPES[0];
+                setNewItem(prev => ({ ...prev, gender: g, shoeType: defaultType }));
+            };
+
+            const handleGenderChangeEditItem = (g) => {
+                const defaultType = g === 'female' ? FEMALE_TYPES[0] : MALE_TYPES[0];
+                setEditingProduct(prev => ({ ...prev, gender: g, shoeType: defaultType }));
+            };
 
             const handleLogin = async () => {
                 if (!loginPass) return alert("Введіть пароль!");
@@ -547,7 +489,7 @@
 
                 if (!newItem.name.trim()) return alert("Будь ласка, вкажіть назву товару!");
                 if (!newItem.price.trim()) return alert("Будь ласка, вкажіть ціну товару!");
-                if (images.length === 0) return alert("Будь ласка, вкажіть хоча б одне посилання на фото (Фото 1)!");
+                if (images.length === 0) return alert("Будь ласка, вкажіть хоча б одне посилання на фото!");
 
                 setIsSubmitting(true);
                 
@@ -559,20 +501,17 @@
                         oldPrice: newItem.oldPrice ? newItem.oldPrice.trim() : '',
                         description: newItem.description ? newItem.description.trim() : '',
                         gender: newItem.gender || 'male',
+                        shoeType: newItem.shoeType || (newItem.gender === 'female' ? FEMALE_TYPES[0] : MALE_TYPES[0]),
                         images: images,
                         createdAt: Date.now()
                     });
 
-                    setNewItem({ name: '', price: '', oldPrice: '', description: '', img1: '', img2: '', img3: '', gender: 'male' });
+                    setNewItem({ name: '', price: '', oldPrice: '', description: '', img1: '', img2: '', img3: '', gender: 'male', shoeType: MALE_TYPES[0] });
                     setShowAddForm(false);
                     alert("Товар успішно додано!");
                 } catch (error) {
                     console.error("Firebase Add Error:", error);
-                    if (error.code === 'PERMISSION_DENIED') {
-                        alert("Помилка доступу: У вас немає прав адміністратора для цієї дії. Перевірте Firebase Rules.");
-                    } else {
-                        alert("Помилка додавання: " + error.message);
-                    }
+                    alert("Помилка додавання: " + error.message);
                 } finally {
                     setIsSubmitting(false);
                 }
@@ -586,17 +525,14 @@
                         price: editingProduct.price,
                         oldPrice: editingProduct.oldPrice || '',
                         description: editingProduct.description || '',
-                        gender: editingProduct.gender || 'male'
+                        gender: editingProduct.gender || 'male',
+                        shoeType: editingProduct.shoeType || ''
                     });
                     setEditingProduct(null);
                     alert("Зміни успішно збережено!");
                 } catch (error) {
                     console.error("Firebase Update Error:", error);
-                    if (error.code === 'PERMISSION_DENIED') {
-                        alert("Помилка доступу: відхилено правилами Firebase Rules.");
-                    } else {
-                        alert("Помилка оновлення: " + error.message);
-                    }
+                    alert("Помилка оновлення: " + error.message);
                 }
             };
 
@@ -606,23 +542,46 @@
                         await db.ref('products/' + id).remove();
                     } catch (error) {
                         console.error("Firebase Delete Error:", error);
-                        if (error.code === 'PERMISSION_DENIED') {
-                            alert("Помилка доступу: відхилено правилами Firebase Rules.");
-                        } else {
-                            alert("Помилка видалення: " + error.message);
-                        }
+                        alert("Помилка видалення: " + error.message);
                     }
                 }
             };
 
-            const filtered = useMemo(() => 
-                products.filter(p => filter === 'all' || p.gender === filter),
-                [products, filter]
-            );
+            // Доступні підкатегорії залежно від обраної статі
+            const currentSubTypes = useMemo(() => {
+                if (genderFilter === 'female') return FEMALE_TYPES;
+                if (genderFilter === 'male') return MALE_TYPES;
+                return [...FEMALE_TYPES, ...MALE_TYPES];
+            }, [genderFilter]);
+
+            // Логіка фільтрації та сортування
+            const filteredAndSorted = useMemo(() => {
+                let result = products.filter(p => {
+                    const matchGender = genderFilter === 'all' || p.gender === genderFilter;
+                    const matchSubType = subTypeFilter === 'all' || p.shoeType === subTypeFilter;
+                    return matchGender && matchSubType;
+                });
+
+                // Сортування
+                result = [...result].sort((a, b) => {
+                    const priceA = parseFloat(String(a.price).replace(/\s+/g, '')) || 0;
+                    const priceB = parseFloat(String(b.price).replace(/\s+/g, '')) || 0;
+                    
+                    if (sortBy === 'price-asc') return priceA - priceB;
+                    if (sortBy === 'price-desc') return priceB - priceA;
+                    if (sortBy === 'discount') {
+                        const discA = calcDiscount(a.price, a.oldPrice);
+                        const discB = calcDiscount(b.price, b.oldPrice);
+                        return discB - discA;
+                    }
+                    return 0; // По замовчуванню (нові першими)
+                });
+
+                return result;
+            }, [products, genderFilter, subTypeFilter, sortBy]);
 
             return (
                 <div className="min-h-screen flex flex-col">
-                    {/* Navigation Bar */}
                     <nav className="fixed top-0 w-full z-50 nav-blur">
                         <div className="max-w-6xl mx-auto px-6 h-20 flex justify-between items-center">
                             <span className="text-2xl font-black tracking-tighter text-white">CROZALI<span className="text-blue-500">.</span></span>
@@ -639,8 +598,7 @@
                         </div>
                     </nav>
 
-                    {/* Hero Section */}
-                    <section className="pt-48 pb-20 px-6 text-center max-w-5xl mx-auto">
+                    <section className="pt-48 pb-16 px-6 text-center max-w-5xl mx-auto">
                         <span className="inline-block bg-blue-500/10 text-blue-400 border border-blue-500/20 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6">
                             Авторське взуття ручної роботи
                         </span>
@@ -655,51 +613,96 @@
                         </a>
                     </section>
 
-                    {/* Catalog Section */}
-                    <section id="catalog" className="py-20 px-6 max-w-6xl mx-auto w-full flex-grow">
-                        <div className="flex flex-col items-center text-center mb-16 gap-6">
+                    <section id="catalog" className="py-12 px-6 max-w-6xl mx-auto w-full flex-grow">
+                        <div className="flex flex-col items-center text-center mb-10 gap-6">
                             <div>
                                 <h2 className="text-4xl font-black mb-2">Наш каталог</h2>
                                 <p className="text-gray-500 tracking-wide uppercase text-xs font-bold">Обирай свою ідеальну пару</p>
                             </div>
                             
-                            {/* Category Filter */}
-                            <div className="flex flex-wrap justify-center bg-[#121215] p-1.5 rounded-2xl border border-white/5">
+                            {/* 1. Фільтр Статі */}
+                            <div className="flex flex-wrap justify-center bg-[#121215] p-1.5 rounded-2xl border border-white/5 shadow-md">
                                 {[
                                     { id: 'all', label: 'Всі моделі' },
-                                    { id: 'male', label: 'Чоловіче' },
-                                    { id: 'female', label: 'Жіноче' }
+                                    { id: 'male', label: 'Чоловіче взуття' },
+                                    { id: 'female', label: 'Жіноче взуття' }
                                 ].map(type => (
                                     <button 
                                         key={type.id} 
-                                        onClick={() => setFilter(type.id)} 
-                                        className={`px-6 py-2.5 rounded-xl text-xs md:text-sm font-bold transition ${filter === type.id ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400 hover:text-white'}`}
+                                        onClick={() => {
+                                            setGenderFilter(type.id);
+                                            setSubTypeFilter('all');
+                                        }} 
+                                        className={`px-6 py-2.5 rounded-xl text-xs md:text-sm font-bold transition ${genderFilter === type.id ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400 hover:text-white'}`}
                                     >
                                         {type.label}
                                     </button>
                                 ))}
                             </div>
+
+                            {/* 2. Фільтр за видам обуві та Сортування */}
+                            <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4 pt-4 border-t border-white/5">
+                                {/* Кнопки видів взуття */}
+                                <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                                    <button 
+                                        onClick={() => setSubTypeFilter('all')}
+                                        className={`px-4 py-1.5 rounded-xl text-xs font-bold border transition ${subTypeFilter === 'all' ? 'bg-blue-500/20 border-blue-500 text-blue-400' : 'border-white/10 text-gray-400 hover:border-white/20'}`}
+                                    >
+                                        Всі види
+                                    </button>
+                                    {currentSubTypes.map(st => (
+                                        <button 
+                                            key={st} 
+                                            onClick={() => setSubTypeFilter(st)}
+                                            className={`px-4 py-1.5 rounded-xl text-xs font-bold border transition ${subTypeFilter === st ? 'bg-blue-500/20 border-blue-500 text-blue-400' : 'border-white/10 text-gray-400 hover:border-white/20'}`}
+                                        >
+                                            {st}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Селект сортування за ціною */}
+                                <div className="flex items-center gap-2 min-w-[200px]">
+                                    <span className="text-xs text-gray-400 font-bold whitespace-nowrap">Сортувати:</span>
+                                    <select 
+                                        value={sortBy} 
+                                        onChange={e => setSortBy(e.target.value)}
+                                        className="bg-[#121215] border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-200 font-bold outline-none focus:border-blue-500 w-full"
+                                    >
+                                        <option value="default">За замовчуванням</option>
+                                        <option value="price-asc">Спочатку дешевші ⬇</option>
+                                        <option value="price-desc">Спочатку дорожчі ⬆</option>
+                                        <option value="discount">З найбільшою знижкою %</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Products Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {filtered.map(p => (
-                                <ProductCard 
-                                    key={p.id} 
-                                    product={p} 
-                                    isAdmin={isAdmin} 
-                                    onDelete={handleDeleteProduct} 
-                                    onEdit={setEditingProduct}
-                                    onOpen={setSelectedProduct} 
-                                />
-                            ))}
-                        </div>
+                        {/* Список товарів */}
+                        {filteredAndSorted.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {filteredAndSorted.map(p => (
+                                    <ProductCard 
+                                        key={p.id} 
+                                        product={p} 
+                                        isAdmin={isAdmin} 
+                                        onDelete={handleDeleteProduct} 
+                                        onEdit={setEditingProduct}
+                                        onOpen={setSelectedProduct} 
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-20 bg-[#121215] rounded-3xl border border-white/5">
+                                <p className="text-gray-400 text-lg font-bold">У цій категорії поки немає товарів.</p>
+                                <button onClick={() => { setGenderFilter('all'); setSubTypeFilter('all'); }} className="mt-4 text-blue-400 underline text-sm font-bold">Скинути всі фільтри</button>
+                            </div>
+                        )}
                     </section>
 
-                    {/* Modal Product Details */}
                     {selectedProduct && <Modal product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
 
-                    {/* Modal Edit Product */}
+                    {/* Модальне вікно редагування */}
                     {editingProduct && (
                         <div className="fixed inset-0 z-[400] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
                             <div className="bg-[#121215] p-8 rounded-3xl border border-blue-500/40 w-full max-w-lg shadow-2xl my-8">
@@ -718,32 +721,46 @@
                                         <input 
                                             value={editingProduct.price} 
                                             type="number" 
-                                            placeholder="напр. 2800"
                                             className="admin-input" 
                                             onChange={e => setEditingProduct({...editingProduct, price: e.target.value})} 
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Стара ціна (без знижки)</label>
+                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Стара ціна</label>
                                         <input 
                                             value={editingProduct.oldPrice || ''} 
                                             type="number" 
-                                            placeholder="напр. 3500"
                                             className="admin-input" 
                                             onChange={e => setEditingProduct({...editingProduct, oldPrice: e.target.value})} 
                                         />
                                     </div>
                                 </div>
 
-                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Категорія</label>
-                                <select 
-                                    className="admin-input" 
-                                    value={editingProduct.gender || 'male'} 
-                                    onChange={e => setEditingProduct({...editingProduct, gender: e.target.value})}
-                                >
-                                    <option value="male">Чоловіче взуття</option>
-                                    <option value="female">Жіноче взуття</option>
-                                </select>
+                                <div className="grid grid-cols-2 gap-4 mb-2">
+                                    <div>
+                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Стать</label>
+                                        <select 
+                                            className="admin-input" 
+                                            value={editingProduct.gender || 'male'} 
+                                            onChange={e => handleGenderChangeEditItem(e.target.value)}
+                                        >
+                                            <option value="male">Чоловіче взуття</option>
+                                            <option value="female">Жіноче взуття</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Вид взуття</label>
+                                        <select 
+                                            className="admin-input" 
+                                            value={editingProduct.shoeType || ''} 
+                                            onChange={e => setEditingProduct({...editingProduct, shoeType: e.target.value})}
+                                        >
+                                            {(editingProduct.gender === 'female' ? FEMALE_TYPES : MALE_TYPES).map(st => (
+                                                <option key={st} value={st}>{st}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
 
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Опис</label>
                                 <textarea 
@@ -752,52 +769,19 @@
                                     onChange={e => setEditingProduct({...editingProduct, description: e.target.value})} 
                                 />
 
-                                <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Фотографії товару (Завантажте з пристрою або вкажіть URL)</label>
-                                {[0, 1, 2].map((idx) => (
-                                    <div key={idx} className="mb-3 p-3 bg-black/30 rounded-xl border border-white/5 flex flex-col gap-2">
-                                        <div className="flex items-center justify-between text-xs text-gray-400 font-bold">
-                                            <span>Фото {idx + 1} {idx === 0 && '*'}</span>
-                                            {editingProduct.images && editingProduct.images[idx] && (
-                                                <button 
-                                                    type="button"
-                                                    onClick={() => {
-                                                        const imgs = [...(editingProduct.images || [])];
-                                                        imgs[idx] = '';
-                                                        setEditingProduct({...editingProduct, images: imgs});
-                                                    }}
-                                                    className="text-red-400 hover:text-red-300 font-normal underline"
-                                                >
-                                                    Видалити фото
-                                                </button>
-                                            )}
-                                        </div>
-                                        <div className="flex gap-2 items-center">
-                                            <label className="file-upload-btn cursor-pointer px-3 py-2 rounded-lg text-xs font-bold text-blue-400 flex items-center gap-1 border border-blue-500/30 hover:border-blue-500 shrink-0">
-                                                📁 Обрати файл
-                                                <input 
-                                                    type="file" 
-                                                    accept="image/*" 
-                                                    className="hidden" 
-                                                    onChange={e => handleFileUpload(e, idx, true)} 
-                                                />
-                                            </label>
-                                            <input 
-                                                placeholder="або вставте посилання (https://...)"
-                                                value={editingProduct.images && editingProduct.images[idx] ? editingProduct.images[idx] : ''} 
-                                                className="admin-input !mb-0 text-xs" 
-                                                onChange={e => {
-                                                    const imgs = [...(editingProduct.images || [])];
-                                                    imgs[idx] = e.target.value;
-                                                    setEditingProduct({...editingProduct, images: imgs});
-                                                }} 
-                                            />
-                                        </div>
-                                        {editingProduct.images && editingProduct.images[idx] && (
-                                            <div className="h-14 w-14 rounded-lg overflow-hidden bg-black/50 border border-white/10 mt-1">
-                                                <img src={editingProduct.images[idx]} className="w-full h-full object-cover" alt="Preview" />
-                                            </div>
-                                        )}
-                                    </div>
+                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Посилання на фото (URL)</label>
+                                {[0, 1, 2].map(idx => (
+                                    <input 
+                                        key={idx}
+                                        placeholder={`Фото ${idx + 1}`}
+                                        value={editingProduct.images && editingProduct.images[idx] ? editingProduct.images[idx] : ''} 
+                                        className="admin-input" 
+                                        onChange={e => {
+                                            const imgs = [...(editingProduct.images || [])];
+                                            imgs[idx] = e.target.value;
+                                            setEditingProduct({...editingProduct, images: imgs});
+                                        }} 
+                                    />
                                 ))}
 
                                 <div className="flex gap-4 mt-4">
@@ -808,7 +792,6 @@
                         </div>
                     )}
 
-                    {/* About Section */}
                     <section id="about" className="py-20 bg-[#121215] border-y border-white/5">
                         <div className="max-w-4xl mx-auto px-6 text-center">
                             <h2 className="text-3xl md:text-4xl font-black mb-6 text-blue-500">Ми — Crozali</h2>
@@ -819,7 +802,6 @@
                         </div>
                     </section>
 
-                    {/* Footer & Contacts */}
                     <footer id="contacts" className="py-20 px-6 max-w-6xl mx-auto text-white w-full">
                         <div className="grid md:grid-cols-2 gap-12 items-center">
                             <div className="text-center md:text-left">
@@ -852,7 +834,6 @@
                         </div>
                     </footer>
 
-                    {/* Admin Access Button */}
                     <button 
                         onClick={() => isAdmin ? handleLogout() : setShowLogin(true)} 
                         className="fixed bottom-6 right-6 z-[100] bg-white/10 backdrop-blur-md px-4 py-3 rounded-full text-xs uppercase font-bold border border-white/20 hover:bg-blue-600 transition shadow-lg"
@@ -860,7 +841,6 @@
                         {isAdmin ? 'Вийти з Адмінки' : '🔑 Admin'}
                     </button>
 
-                    {/* Admin Login Modal */}
                     {showLogin && (
                         <div className="fixed inset-0 z-[300] bg-black/90 backdrop-blur-sm flex items-center justify-center p-6">
                             <div className="bg-[#121215] p-8 rounded-3xl border border-blue-500/40 w-full max-w-sm shadow-2xl">
@@ -879,7 +859,7 @@
                         </div>
                     )}
 
-                    {/* Add Product Modal */}
+                    {/* Модальне вікно додавання товару */}
                     {showAddForm && (
                         <div className="fixed inset-0 z-[300] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
                             <div className="bg-[#121215] p-8 rounded-3xl border border-white/10 w-full max-w-lg my-8">
@@ -887,7 +867,7 @@
                                 
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Назва моделі *</label>
                                 <input 
-                                    placeholder="напр. Лофери шкіряні" 
+                                    placeholder="напр. Чоловічі кросівки White Leather" 
                                     className="admin-input" 
                                     value={newItem.name} 
                                     onChange={e => setNewItem({...newItem, name: e.target.value})} 
@@ -897,7 +877,7 @@
                                     <div>
                                         <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Ціна (грн) *</label>
                                         <input 
-                                            placeholder="напр. 3499" 
+                                            placeholder="напр. 2499" 
                                             type="number" 
                                             className="admin-input" 
                                             value={newItem.price} 
@@ -905,9 +885,9 @@
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Стара ціна (необов'язково)</label>
+                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Стара ціна (опціонально)</label>
                                         <input 
-                                            placeholder="напр. 3999" 
+                                            placeholder="напр. 3125" 
                                             type="number" 
                                             className="admin-input" 
                                             value={newItem.oldPrice} 
@@ -915,76 +895,68 @@
                                         />
                                     </div>
                                 </div>
+
+                                <div className="grid grid-cols-2 gap-4 mb-2">
+                                    <div>
+                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Стать</label>
+                                        <select 
+                                            className="admin-input" 
+                                            value={newItem.gender} 
+                                            onChange={e => handleGenderChangeNewItem(e.target.value)}
+                                        >
+                                            <option value="male">Чоловіче взуття</option>
+                                            <option value="female">Жіноче взуття</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Вид взуття</label>
+                                        <select 
+                                            className="admin-input" 
+                                            value={newItem.shoeType} 
+                                            onChange={e => setNewItem({...newItem, shoeType: e.target.value})}
+                                        >
+                                            {(newItem.gender === 'female' ? FEMALE_TYPES : MALE_TYPES).map(st => (
+                                                <option key={st} value={st}>{st}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
                                 
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Опис</label>
                                 <textarea 
-                                    placeholder="Короткий опис матеріалів та підошви..." 
+                                    placeholder="Короткий опис матеріалів..." 
                                     className="admin-input h-24" 
                                     value={newItem.description} 
                                     onChange={e => setNewItem({...newItem, description: e.target.value})} 
                                 />
                                 
-                                <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Фотографії товару (Завантажте файл або вставте URL)</label>
-                                {[
-                                    { key: 'img1', label: 'Фото 1 (Головне) *' },
-                                    { key: 'img2', label: 'Фото 2 (Опціонально)' },
-                                    { key: 'img3', label: 'Фото 3 (Опціонально)' }
-                                ].map((item, idx) => (
-                                    <div key={item.key} className="mb-3 p-3 bg-black/30 rounded-xl border border-white/5 flex flex-col gap-2">
-                                        <div className="flex items-center justify-between text-xs text-gray-400 font-bold">
-                                            <span>{item.label}</span>
-                                            {newItem[item.key] && (
-                                                <button 
-                                                    type="button"
-                                                    onClick={() => setNewItem({...newItem, [item.key]: ''})}
-                                                    className="text-red-400 hover:text-red-300 font-normal underline"
-                                                >
-                                                    Видалити фото
-                                                </button>
-                                            )}
-                                        </div>
-                                        <div className="flex gap-2 items-center">
-                                            <label className="file-upload-btn cursor-pointer px-3 py-2 rounded-lg text-xs font-bold text-blue-400 flex items-center gap-1 border border-blue-500/30 hover:border-blue-500 shrink-0">
-                                                📁 Обрати файл
-                                                <input 
-                                                    type="file" 
-                                                    accept="image/*" 
-                                                    className="hidden" 
-                                                    onChange={e => handleFileUpload(e, item.key, false)} 
-                                                />
-                                            </label>
-                                            <input 
-                                                placeholder="або URL (https://...)" 
-                                                className="admin-input !mb-0 text-xs" 
-                                                value={newItem[item.key]} 
-                                                onChange={e => setNewItem({...newItem, [item.key]: e.target.value})} 
-                                            />
-                                        </div>
-                                        {newItem[item.key] && (
-                                            <div className="h-14 w-14 rounded-lg overflow-hidden bg-black/50 border border-white/10 mt-1">
-                                                <img src={newItem[item.key]} className="w-full h-full object-cover" alt="Preview" />
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                                
-                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Категорія</label>
-                                <select 
+                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Посилання на фото (URL)</label>
+                                <input 
+                                    placeholder="URL Фото 1 *" 
                                     className="admin-input" 
-                                    value={newItem.gender} 
-                                    onChange={e => setNewItem({...newItem, gender: e.target.value})}
-                                >
-                                    <option value="male">Чоловіче взуття</option>
-                                    <option value="female">Жіноче взуття</option>
-                                </select>
-
-                                <div className="flex gap-4 mt-6">
+                                    value={newItem.img1} 
+                                    onChange={e => setNewItem({...newItem, img1: e.target.value})} 
+                                />
+                                <input 
+                                    placeholder="URL Фото 2" 
+                                    className="admin-input" 
+                                    value={newItem.img2} 
+                                    onChange={e => setNewItem({...newItem, img2: e.target.value})} 
+                                />
+                                <input 
+                                    placeholder="URL Фото 3" 
+                                    className="admin-input" 
+                                    value={newItem.img3} 
+                                    onChange={e => setNewItem({...newItem, img3: e.target.value})} 
+                                />
+                                
+                                <div className="flex gap-4 mt-4">
                                     <button 
                                         onClick={handleAddProduct} 
-                                        disabled={isSubmitting} 
+                                        disabled={isSubmitting}
                                         className="flex-1 bg-blue-600 hover:bg-blue-500 py-3.5 rounded-xl font-bold text-white transition disabled:opacity-50"
                                     >
-                                        {isSubmitting ? 'Збереження...' : 'ДОДАТИ ТОВАР'}
+                                        {isSubmitting ? 'Збереження...' : 'ЗБЕРЕГТИ'}
                                     </button>
                                     <button 
                                         onClick={() => setShowAddForm(false)} 
@@ -1000,8 +972,7 @@
             );
         }
 
-        const container = document.getElementById('root');
-        const root = ReactDOM.createRoot(container);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
 </body>
