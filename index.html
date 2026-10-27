@@ -393,7 +393,6 @@
             const [showAddForm, setShowAddForm] = useState(false);
             const [isSubmitting, setIsSubmitting] = useState(false);
             
-            // Стан для форми додавання (з підтримкою гібридних фото: URL або файл)
             const [newItem, setNewItem] = useState({
                 name: '', price: '', oldPrice: '', description: '', gender: 'male', shoeType: MALE_TYPES[0],
                 images: ['', '', '']
@@ -449,7 +448,7 @@
                 }));
             };
 
-            // Обробник завантаження файлу зображення (конвертація у Base64) без втрати інших фото
+            // Обробник вибору локального файлу з ПК (зберігає існуючі і не затирає інші фото)
             const handleImageFileChange = (e, index, isEditing = false) => {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -779,31 +778,59 @@
                                     onChange={e => setEditingProduct({...editingProduct, description: e.target.value})} 
                                 />
 
-                                <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Фото (Посилання URL або файл з пристрою)</label>
-                                {[0, 1, 2].map(idx => (
-                                    <div key={idx} className="mb-3 p-3 bg-white/5 rounded-2xl border border-white/5 space-y-2">
-                                        <div className="text-[11px] text-gray-400 font-bold uppercase">Фото {idx + 1}</div>
-                                        <input 
-                                            placeholder={`URL-посилання ${idx + 1}`}
-                                            value={editingProduct.images && editingProduct.images[idx] && !editingProduct.images[idx].startsWith('data:') ? editingProduct.images[idx] : ''} 
-                                            className="admin-input !mb-1 text-xs" 
-                                            onChange={e => {
-                                                const imgs = [...(editingProduct.images || ['', '', ''])];
-                                                imgs[idx] = e.target.value;
-                                                setEditingProduct({...editingProduct, images: imgs});
-                                            }} 
-                                        />
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xs text-gray-500">Або файл:</span>
+                                <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Фото (Введіть URL АБО завантажте файл з ПК)</label>
+                                {[0, 1, 2].map(idx => {
+                                    const imgVal = editingProduct.images && editingProduct.images[idx] ? editingProduct.images[idx] : '';
+                                    const isBase64 = imgVal.startsWith('data:');
+                                    return (
+                                        <div key={idx} className="mb-4 p-4 bg-white/5 rounded-2xl border border-white/10 space-y-3">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-xs text-blue-400 font-bold uppercase">Фото {idx + 1}</span>
+                                                {imgVal && (
+                                                    <span className="text-[10px] text-green-400 font-bold bg-green-500/10 px-2 py-0.5 rounded-full">
+                                                        {isBase64 ? '✓ Файл з ПК' : '✓ Посилання URL'}
+                                                    </span>
+                                                )}
+                                            </div>
                                             <input 
-                                                type="file" 
-                                                accept="image/*"
-                                                className="text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer"
-                                                onChange={e => handleImageFileChange(e, idx, true)}
+                                                placeholder={`URL-посилання ${idx + 1}`}
+                                                value={!isBase64 ? imgVal : ''} 
+                                                className="admin-input !mb-0 text-xs" 
+                                                onChange={e => {
+                                                    const imgs = [...(editingProduct.images || ['', '', ''])];
+                                                    imgs[idx] = e.target.value;
+                                                    setEditingProduct({...editingProduct, images: imgs});
+                                                }} 
                                             />
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs text-gray-400">Або файл з пристрою:</span>
+                                                <input 
+                                                    type="file" 
+                                                    accept="image/*"
+                                                    className="text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer"
+                                                    onChange={e => handleImageFileChange(e, idx, true)}
+                                                />
+                                            </div>
+                                            {imgVal && (
+                                                <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-white/20 bg-black mt-2">
+                                                    <img src={imgVal} alt={`Preview ${idx+1}`} className="w-full h-full object-cover" />
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const imgs = [...(editingProduct.images || ['', '', ''])];
+                                                            imgs[idx] = '';
+                                                            setEditingProduct({...editingProduct, images: imgs});
+                                                        }}
+                                                        className="absolute top-0 right-0 bg-red-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-bl-xl font-bold"
+                                                        title="Видалити"
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
 
                                 <div className="flex gap-4 mt-6">
                                     <button onClick={handleUpdateProduct} className="flex-1 bg-blue-600 hover:bg-blue-500 py-3.5 rounded-xl font-bold text-white transition">ЗБЕРЕГТИ ЗМІНИ</button>
@@ -951,31 +978,59 @@
                                     onChange={e => setNewItem({...newItem, description: e.target.value})} 
                                 />
                                 
-                                <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Фото (Посилання URL або файл з пристрою)</label>
-                                {[0, 1, 2].map(idx => (
-                                    <div key={idx} className="mb-3 p-3 bg-white/5 rounded-2xl border border-white/5 space-y-2">
-                                        <div className="text-[11px] text-gray-400 font-bold uppercase">Фото {idx + 1}</div>
-                                        <input 
-                                            placeholder={`URL-посилання ${idx + 1}`}
-                                            value={newItem.images && newItem.images[idx] && !newItem.images[idx].startsWith('data:') ? newItem.images[idx] : ''} 
-                                            className="admin-input !mb-1 text-xs" 
-                                            onChange={e => {
-                                                const imgs = [...(newItem.images || ['', '', ''])];
-                                                imgs[idx] = e.target.value;
-                                                setNewItem({...newItem, images: imgs});
-                                            }} 
-                                        />
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xs text-gray-500">Або файл:</span>
+                                <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Фото (Введіть URL АБО завантажте файл з ПК)</label>
+                                {[0, 1, 2].map(idx => {
+                                    const imgVal = newItem.images && newItem.images[idx] ? newItem.images[idx] : '';
+                                    const isBase64 = imgVal.startsWith('data:');
+                                    return (
+                                        <div key={idx} className="mb-4 p-4 bg-white/5 rounded-2xl border border-white/10 space-y-3">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-xs text-blue-400 font-bold uppercase">Фото {idx + 1}</span>
+                                                {imgVal && (
+                                                    <span className="text-[10px] text-green-400 font-bold bg-green-500/10 px-2 py-0.5 rounded-full">
+                                                        {isBase64 ? '✓ Файл з ПК' : '✓ Посилання URL'}
+                                                    </span>
+                                                )}
+                                            </div>
                                             <input 
-                                                type="file" 
-                                                accept="image/*"
-                                                className="text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer"
-                                                onChange={e => handleImageFileChange(e, idx, false)}
+                                                placeholder={`URL-посилання ${idx + 1}`}
+                                                value={!isBase64 ? imgVal : ''} 
+                                                className="admin-input !mb-0 text-xs" 
+                                                onChange={e => {
+                                                    const imgs = [...(newItem.images || ['', '', ''])];
+                                                    imgs[idx] = e.target.value;
+                                                    setNewItem({...newItem, images: imgs});
+                                                }} 
                                             />
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs text-gray-400">Або файл з пристрою:</span>
+                                                <input 
+                                                    type="file" 
+                                                    accept="image/*"
+                                                    className="text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer"
+                                                    onChange={e => handleImageFileChange(e, idx, false)}
+                                                />
+                                            </div>
+                                            {imgVal && (
+                                                <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-white/20 bg-black mt-2">
+                                                    <img src={imgVal} alt={`Preview ${idx+1}`} className="w-full h-full object-cover" />
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const imgs = [...(newItem.images || ['', '', ''])];
+                                                            imgs[idx] = '';
+                                                            setNewItem({...newItem, images: imgs});
+                                                        }}
+                                                        className="absolute top-0 right-0 bg-red-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-bl-xl font-bold"
+                                                        title="Видалити"
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                                 
                                 <div className="flex gap-4 mt-6">
                                     <button 
