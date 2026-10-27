@@ -32,7 +32,6 @@
             position: relative;
         }
 
-        /* Chaos / Organic Plus Grid Background */
         .chaos-bg {
             position: fixed;
             top: 0;
@@ -108,15 +107,8 @@
             transition: all 0.3s ease;
         }
 
-        .indicator-active {
-            width: 20px;
-            background-color: #3b82f6;
-        }
-
-        .indicator-inactive {
-            width: 6px;
-            background-color: rgba(255, 255, 255, 0.3);
-        }
+        .indicator-active { width: 20px; background-color: #3b82f6; }
+        .indicator-inactive { width: 6px; background-color: rgba(255, 255, 255, 0.3); }
 
         .admin-input {
             width: 100%;
@@ -144,17 +136,8 @@
             background: rgba(59, 130, 246, 0.1);
         }
 
-        .badge-yellow {
-            background: #eab308;
-            color: #000000;
-            box-shadow: 0 4px 12px rgba(234, 179, 8, 0.4);
-        }
-
-        .badge-red {
-            background: #ef4444;
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-        }
+        .badge-yellow { background: #eab308; color: #000000; box-shadow: 0 4px 12px rgba(234, 179, 8, 0.4); }
+        .badge-red { background: #ef4444; color: #ffffff; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); }
 
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0a0a0c; }
@@ -188,7 +171,6 @@
 
         const ADMIN_EMAIL = "admin@crozali.local";
 
-        // Списки категорій для вибору
         const FEMALE_TYPES = ["Жіночі лофери", "Жіночі кеди", "Жіночі кросівки", "Жіночі туфлі", "Жіночі Конверси", "Жіночі каблуки", "Жіночі Снікерси"];
         const MALE_TYPES = ["Чоловічі кеди", "Чоловічі монкі", "Чоловічі туфлі", "Чоловічі кросівки"];
 
@@ -220,7 +202,7 @@
                 oldPrice: "",
                 gender: "male",
                 shoeType: "Чоловічі кросівки",
-                description: "Натуральна шкіра, анатимочна устілка, легка підошва.",
+                description: "Натуральна шкіра, анатомічна устілка, легка підошва.",
                 images: ["https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=800&auto=format&fit=crop&q=60"]
             }
         ];
@@ -230,6 +212,29 @@
             const op = parseFloat(String(oldPrice).replace(/\s+/g, ''));
             if (isNaN(p) || isNaN(op) || op <= p) return 0;
             return Math.round(((op - p) / op) * 100);
+        };
+
+        // Функція розумного автовизначення типу взуття та статі за назвою
+        const detectShoeCategory = (name) => {
+            const lower = name.toLowerCase();
+            if (lower.includes('лофер')) return { type: 'Жіночі лофери', gender: 'female' };
+            if (lower.includes('монк')) return { type: 'Чоловічі монкі', gender: 'male' };
+            if (lower.includes('конверс')) return { type: 'Жіночі Конверси', gender: 'female' };
+            if (lower.includes('каблук')) return { type: 'Жіночі каблуки', gender: 'female' };
+            
+            if (lower.includes('снікерс') || lower.includes('снекерс')) {
+                return lower.includes('чолов') ? { type: 'Чоловічі кросівки', gender: 'male' } : { type: 'Жіночі Снікерси', gender: 'female' };
+            }
+            if (lower.includes('кед')) {
+                return lower.includes('чолов') ? { type: 'Чоловічі кеди', gender: 'male' } : { type: 'Жіночі кеди', gender: 'female' };
+            }
+            if (lower.includes('кросівк')) {
+                return lower.includes('чолов') ? { type: 'Чоловічі кросівки', gender: 'male' } : { type: 'Жіночі кросівки', gender: 'female' };
+            }
+            if (lower.includes('туфл')) {
+                return lower.includes('чолов') ? { type: 'Чоловічі туфлі', gender: 'male' } : { type: 'Жіночі туфлі', gender: 'female' };
+            }
+            return null;
         };
 
         const ProductCard = React.memo(({ product, onOpen, isAdmin, onDelete, onEdit }) => {
@@ -396,10 +401,9 @@
         function App() {
             const [products, setProducts] = useState([]);
             
-            // Фільтри та Сортування
             const [genderFilter, setGenderFilter] = useState('all');
             const [subTypeFilter, setSubTypeFilter] = useState('all');
-            const [sortBy, setSortBy] = useState('default'); // 'default', 'price-asc', 'price-desc', 'discount'
+            const [sortBy, setSortBy] = useState('default');
             
             const [selectedProduct, setSelectedProduct] = useState(null);
             const [editingProduct, setEditingProduct] = useState(null);
@@ -447,15 +451,24 @@
                 };
             }, []);
 
-            // Автозміна вибору типу при зміні статі в адмінці
-            const handleGenderChangeNewItem = (g) => {
-                const defaultType = g === 'female' ? FEMALE_TYPES[0] : MALE_TYPES[0];
-                setNewItem(prev => ({ ...prev, gender: g, shoeType: defaultType }));
+            // Обробник зміни імені для нового товару (розумна автосинхронизація)
+            const handleNewItemNameChange = (val) => {
+                const detected = detectShoeCategory(val);
+                setNewItem(prev => ({
+                    ...prev,
+                    name: val,
+                    ...(detected ? { shoeType: detected.type, gender: detected.gender } : {})
+                }));
             };
 
-            const handleGenderChangeEditItem = (g) => {
-                const defaultType = g === 'female' ? FEMALE_TYPES[0] : MALE_TYPES[0];
-                setEditingProduct(prev => ({ ...prev, gender: g, shoeType: defaultType }));
+            // Обробник зміни імені для редагованого товару
+            const handleEditItemNameChange = (val) => {
+                const detected = detectShoeCategory(val);
+                setEditingProduct(prev => ({
+                    ...prev,
+                    name: val,
+                    ...(detected ? { shoeType: detected.type, gender: detected.gender } : {})
+                }));
             };
 
             const handleLogin = async () => {
@@ -547,14 +560,12 @@
                 }
             };
 
-            // Доступні підкатегорії залежно від обраної статі
             const currentSubTypes = useMemo(() => {
                 if (genderFilter === 'female') return FEMALE_TYPES;
                 if (genderFilter === 'male') return MALE_TYPES;
                 return [...FEMALE_TYPES, ...MALE_TYPES];
             }, [genderFilter]);
 
-            // Логіка фільтрації та сортування
             const filteredAndSorted = useMemo(() => {
                 let result = products.filter(p => {
                     const matchGender = genderFilter === 'all' || p.gender === genderFilter;
@@ -562,7 +573,6 @@
                     return matchGender && matchSubType;
                 });
 
-                // Сортування
                 result = [...result].sort((a, b) => {
                     const priceA = parseFloat(String(a.price).replace(/\s+/g, '')) || 0;
                     const priceB = parseFloat(String(b.price).replace(/\s+/g, '')) || 0;
@@ -574,7 +584,7 @@
                         const discB = calcDiscount(b.price, b.oldPrice);
                         return discB - discA;
                     }
-                    return 0; // По замовчуванню (нові першими)
+                    return 0;
                 });
 
                 return result;
@@ -620,7 +630,7 @@
                                 <p className="text-gray-500 tracking-wide uppercase text-xs font-bold">Обирай свою ідеальну пару</p>
                             </div>
                             
-                            {/* 1. Фільтр Статі */}
+                            {/* Фільтр Статі */}
                             <div className="flex flex-wrap justify-center bg-[#121215] p-1.5 rounded-2xl border border-white/5 shadow-md">
                                 {[
                                     { id: 'all', label: 'Всі моделі' },
@@ -640,9 +650,8 @@
                                 ))}
                             </div>
 
-                            {/* 2. Фільтр за видам обуві та Сортування */}
+                            {/* Фільтр за виглядом взуття та Сортування */}
                             <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4 pt-4 border-t border-white/5">
-                                {/* Кнопки видів взуття */}
                                 <div className="flex flex-wrap gap-2 justify-center md:justify-start">
                                     <button 
                                         onClick={() => setSubTypeFilter('all')}
@@ -661,7 +670,6 @@
                                     ))}
                                 </div>
 
-                                {/* Селект сортування за ціною */}
                                 <div className="flex items-center gap-2 min-w-[200px]">
                                     <span className="text-xs text-gray-400 font-bold whitespace-nowrap">Сортувати:</span>
                                     <select 
@@ -678,7 +686,6 @@
                             </div>
                         </div>
 
-                        {/* Список товарів */}
                         {filteredAndSorted.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                 {filteredAndSorted.map(p => (
@@ -708,11 +715,11 @@
                             <div className="bg-[#121215] p-8 rounded-3xl border border-blue-500/40 w-full max-w-lg shadow-2xl my-8">
                                 <h2 className="text-2xl font-bold mb-6 text-blue-500 uppercase">Редагувати дані</h2>
                                 
-                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Назва моделі</label>
+                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Назва моделі (автовизначення типу)</label>
                                 <input 
                                     value={editingProduct.name} 
                                     className="admin-input" 
-                                    onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} 
+                                    onChange={e => handleEditItemNameChange(e.target.value)} 
                                 />
 
                                 <div className="grid grid-cols-2 gap-4 mb-2">
@@ -742,7 +749,7 @@
                                         <select 
                                             className="admin-input" 
                                             value={editingProduct.gender || 'male'} 
-                                            onChange={e => handleGenderChangeEditItem(e.target.value)}
+                                            onChange={e => setEditingProduct({...editingProduct, gender: e.target.value})}
                                         >
                                             <option value="male">Чоловіче взуття</option>
                                             <option value="female">Жіноче взуття</option>
@@ -865,12 +872,12 @@
                             <div className="bg-[#121215] p-8 rounded-3xl border border-white/10 w-full max-w-lg my-8">
                                 <h2 className="text-2xl font-bold mb-6 text-blue-500 uppercase">Додати модель</h2>
                                 
-                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Назва моделі *</label>
+                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Назва моделі (автовизначення типу) *</label>
                                 <input 
-                                    placeholder="напр. Чоловічі кросівки White Leather" 
+                                    placeholder="напр. Жіночі лофери Classic" 
                                     className="admin-input" 
                                     value={newItem.name} 
-                                    onChange={e => setNewItem({...newItem, name: e.target.value})} 
+                                    onChange={e => handleNewItemNameChange(e.target.value)} 
                                 />
                                 
                                 <div className="grid grid-cols-2 gap-4 mb-2">
@@ -885,7 +892,7 @@
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Стара ціна (опціонально)</label>
+                                        <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Стара ціна</label>
                                         <input 
                                             placeholder="напр. 3125" 
                                             type="number" 
@@ -902,7 +909,7 @@
                                         <select 
                                             className="admin-input" 
                                             value={newItem.gender} 
-                                            onChange={e => handleGenderChangeNewItem(e.target.value)}
+                                            onChange={e => setNewItem({...newItem, gender: e.target.value})}
                                         >
                                             <option value="male">Чоловіче взуття</option>
                                             <option value="female">Жіноче взуття</option>
