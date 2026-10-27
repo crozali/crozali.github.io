@@ -101,15 +101,6 @@
             border-color: #3b82f6;
         }
 
-        .indicator-dot {
-            height: 4px;
-            border-radius: 9999px;
-            transition: all 0.3s ease;
-        }
-
-        .indicator-active { width: 20px; background-color: #3b82f6; }
-        .indicator-inactive { width: 6px; background-color: rgba(255, 255, 255, 0.3); }
-
         .admin-input {
             width: 100%;
             background: #18181b;
@@ -194,16 +185,6 @@
                 shoeType: "Жіночі лофери",
                 description: "Ніжна шкіра теляти, стильна та комфортна колодка для прогулянок містом.",
                 images: ["https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800&auto=format&fit=crop&q=60"]
-            },
-            {
-                id: "demo3",
-                name: "Чоловічі Кросівки Sport Leather",
-                price: "2999",
-                oldPrice: "",
-                gender: "male",
-                shoeType: "Чоловічі кросівки",
-                description: "Натуральна шкіра, анатомічна устілка, легка підошва.",
-                images: ["https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=800&auto=format&fit=crop&q=60"]
             }
         ];
 
@@ -214,7 +195,6 @@
             return Math.round(((op - p) / op) * 100);
         };
 
-        // Функція розумного автовизначення типу взуття та статі за назвою
         const detectShoeCategory = (name) => {
             const lower = name.toLowerCase();
             const isMale = lower.includes('чолов');
@@ -292,17 +272,10 @@
                         />
 
                         {product.images && product.images.length > 1 && (
-                            <>
-                                <div className="absolute inset-0 z-20 flex items-center justify-between px-3 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                                    <button onClick={prev} className="slider-btn pointer-events-auto w-9 h-9 rounded-full text-white flex items-center justify-center shadow-lg">❮</button>
-                                    <button onClick={next} className="slider-btn pointer-events-auto w-9 h-9 rounded-full text-white flex items-center justify-center shadow-lg">❯</button>
-                                </div>
-                                <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center gap-1.5 pointer-events-none">
-                                    {product.images.map((_, idx) => (
-                                        <div key={idx} className={`indicator-dot ${idx === currentImg ? 'indicator-active' : 'indicator-inactive'}`}></div>
-                                    ))}
-                                </div>
-                            </>
+                            <div className="absolute inset-0 z-20 flex items-center justify-between px-3 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                <button onClick={prev} className="slider-btn pointer-events-auto w-9 h-9 rounded-full text-white flex items-center justify-center shadow-lg font-bold">❮</button>
+                                <button onClick={next} className="slider-btn pointer-events-auto w-9 h-9 rounded-full text-white flex items-center justify-center shadow-lg font-bold">❯</button>
+                            </div>
                         )}
                     </div>
 
@@ -362,8 +335,8 @@
                             />
                             {product.images && product.images.length > 1 && (
                                 <div className="absolute inset-0 flex items-center justify-between px-4">
-                                    <button onClick={() => { setCurrentImg(prev => (prev === 0 ? product.images.length - 1 : prev - 1)); setIsLoaded(false); }} className="slider-btn w-11 h-11 rounded-full text-white flex items-center justify-center">❮</button>
-                                    <button onClick={() => { setCurrentImg(prev => (prev === product.images.length - 1 ? 0 : prev + 1)); setIsLoaded(false); }} className="slider-btn w-11 h-11 rounded-full text-white flex items-center justify-center">❯</button>
+                                    <button onClick={() => { setCurrentImg(prev => (prev === 0 ? product.images.length - 1 : prev - 1)); setIsLoaded(false); }} className="slider-btn w-11 h-11 rounded-full text-white flex items-center justify-center font-bold text-lg">❮</button>
+                                    <button onClick={() => { setCurrentImg(prev => (prev === product.images.length - 1 ? 0 : prev + 1)); setIsLoaded(false); }} className="slider-btn w-11 h-11 rounded-full text-white flex items-center justify-center font-bold text-lg">❯</button>
                                 </div>
                             )}
                         </div>
@@ -419,8 +392,11 @@
 
             const [showAddForm, setShowAddForm] = useState(false);
             const [isSubmitting, setIsSubmitting] = useState(false);
+            
+            // Стан для форми додавання (з підтримкою гібридних фото: URL або файл)
             const [newItem, setNewItem] = useState({
-                name: '', price: '', oldPrice: '', description: '', img1: '', img2: '', img3: '', gender: 'male', shoeType: MALE_TYPES[0]
+                name: '', price: '', oldPrice: '', description: '', gender: 'male', shoeType: MALE_TYPES[0],
+                images: ['', '', '']
             });
 
             const phone = "380673485909";
@@ -473,6 +449,31 @@
                 }));
             };
 
+            // Обробник завантаження файлу зображення (конвертація у Base64) без втрати інших фото
+            const handleImageFileChange = (e, index, isEditing = false) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const base64String = reader.result;
+                    if (isEditing) {
+                        setEditingProduct(prev => {
+                            const imgs = [...(prev.images || ['', '', ''])];
+                            imgs[index] = base64String;
+                            return { ...prev, images: imgs };
+                        });
+                    } else {
+                        setNewItem(prev => {
+                            const imgs = [...(prev.images || ['', '', ''])];
+                            imgs[index] = base64String;
+                            return { ...prev, images: imgs };
+                        });
+                    }
+                };
+                reader.readAsDataURL(file);
+            };
+
             const handleLogin = async () => {
                 if (!loginPass) return alert("Введіть пароль!");
                 setLoginBusy(true);
@@ -498,13 +499,11 @@
             };
 
             const handleAddProduct = async () => {
-                const images = [newItem.img1, newItem.img2, newItem.img3]
-                    .map(img => img ? img.trim() : '')
-                    .filter(url => url !== '');
+                const finalImages = (newItem.images || []).map(img => img ? img.trim() : '').filter(url => url !== '');
 
                 if (!newItem.name.trim()) return alert("Будь ласка, вкажіть назву товару!");
                 if (!newItem.price.trim()) return alert("Будь ласка, вкажіть ціну товару!");
-                if (images.length === 0) return alert("Будь ласка, вкажіть хоча б одне посилання на фото!");
+                if (finalImages.length === 0) return alert("Будь ласка, додайте хоча б одне фото (посиланням або файлом)!");
 
                 setIsSubmitting(true);
                 
@@ -517,11 +516,11 @@
                         description: newItem.description ? newItem.description.trim() : '',
                         gender: newItem.gender || 'male',
                         shoeType: newItem.shoeType || (newItem.gender === 'female' ? FEMALE_TYPES[0] : MALE_TYPES[0]),
-                        images: images,
+                        images: finalImages,
                         createdAt: Date.now()
                     });
 
-                    setNewItem({ name: '', price: '', oldPrice: '', description: '', img1: '', img2: '', img3: '', gender: 'male', shoeType: MALE_TYPES[0] });
+                    setNewItem({ name: '', price: '', oldPrice: '', description: '', gender: 'male', shoeType: MALE_TYPES[0], images: ['', '', ''] });
                     setShowAddForm(false);
                     alert("Товар успішно додано!");
                 } catch (error) {
@@ -534,6 +533,9 @@
 
             const handleUpdateProduct = async () => {
                 if (!editingProduct.price) return alert("Ціна не може бути порожньою!");
+                const finalImages = (editingProduct.images || []).map(img => img ? img.trim() : '').filter(url => url !== '');
+                if (finalImages.length === 0) return alert("Товар повинен мати хоча б одне фото!");
+
                 try {
                     await db.ref('products/' + editingProduct.id).update({
                         name: editingProduct.name,
@@ -541,7 +543,8 @@
                         oldPrice: editingProduct.oldPrice || '',
                         description: editingProduct.description || '',
                         gender: editingProduct.gender || 'male',
-                        shoeType: editingProduct.shoeType || ''
+                        shoeType: editingProduct.shoeType || '',
+                        images: finalImages
                     });
                     setEditingProduct(null);
                     alert("Зміни успішно збережено!");
@@ -632,7 +635,6 @@
                                 <p className="text-gray-500 tracking-wide uppercase text-xs font-bold">Обирай свою ідеальну пару</p>
                             </div>
                             
-                            {/* Фільтр Статі */}
                             <div className="flex flex-wrap justify-center bg-[#121215] p-1.5 rounded-2xl border border-white/5 shadow-md">
                                 {[
                                     { id: 'all', label: 'Всі моделі' },
@@ -652,7 +654,6 @@
                                 ))}
                             </div>
 
-                            {/* Фільтр за виглядом взуття та Сортування */}
                             <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4 pt-4 border-t border-white/5">
                                 <div className="flex flex-wrap gap-2 justify-center md:justify-start">
                                     <button 
@@ -778,22 +779,33 @@
                                     onChange={e => setEditingProduct({...editingProduct, description: e.target.value})} 
                                 />
 
-                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Посилання на фото (URL)</label>
+                                <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Фото (Посилання URL або файл з пристрою)</label>
                                 {[0, 1, 2].map(idx => (
-                                    <input 
-                                        key={idx}
-                                        placeholder={`Фото ${idx + 1}`}
-                                        value={editingProduct.images && editingProduct.images[idx] ? editingProduct.images[idx] : ''} 
-                                        className="admin-input" 
-                                        onChange={e => {
-                                            const imgs = [...(editingProduct.images || [])];
-                                            imgs[idx] = e.target.value;
-                                            setEditingProduct({...editingProduct, images: imgs});
-                                        }} 
-                                    />
+                                    <div key={idx} className="mb-3 p-3 bg-white/5 rounded-2xl border border-white/5 space-y-2">
+                                        <div className="text-[11px] text-gray-400 font-bold uppercase">Фото {idx + 1}</div>
+                                        <input 
+                                            placeholder={`URL-посилання ${idx + 1}`}
+                                            value={editingProduct.images && editingProduct.images[idx] && !editingProduct.images[idx].startsWith('data:') ? editingProduct.images[idx] : ''} 
+                                            className="admin-input !mb-1 text-xs" 
+                                            onChange={e => {
+                                                const imgs = [...(editingProduct.images || ['', '', ''])];
+                                                imgs[idx] = e.target.value;
+                                                setEditingProduct({...editingProduct, images: imgs});
+                                            }} 
+                                        />
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs text-gray-500">Або файл:</span>
+                                            <input 
+                                                type="file" 
+                                                accept="image/*"
+                                                className="text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer"
+                                                onChange={e => handleImageFileChange(e, idx, true)}
+                                            />
+                                        </div>
+                                    </div>
                                 ))}
 
-                                <div className="flex gap-4 mt-4">
+                                <div className="flex gap-4 mt-6">
                                     <button onClick={handleUpdateProduct} className="flex-1 bg-blue-600 hover:bg-blue-500 py-3.5 rounded-xl font-bold text-white transition">ЗБЕРЕГТИ ЗМІНИ</button>
                                     <button onClick={() => setEditingProduct(null)} className="flex-1 bg-white/5 hover:bg-white/10 py-3.5 rounded-xl font-bold text-gray-300 transition">СКАСУВАТИ</button>
                                 </div>
@@ -939,27 +951,33 @@
                                     onChange={e => setNewItem({...newItem, description: e.target.value})} 
                                 />
                                 
-                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Посилання на фото (URL)</label>
-                                <input 
-                                    placeholder="URL Фото 1 *" 
-                                    className="admin-input" 
-                                    value={newItem.img1} 
-                                    onChange={e => setNewItem({...newItem, img1: e.target.value})} 
-                                />
-                                <input 
-                                    placeholder="URL Фото 2" 
-                                    className="admin-input" 
-                                    value={newItem.img2} 
-                                    onChange={e => setNewItem({...newItem, img2: e.target.value})} 
-                                />
-                                <input 
-                                    placeholder="URL Фото 3" 
-                                    className="admin-input" 
-                                    value={newItem.img3} 
-                                    onChange={e => setNewItem({...newItem, img3: e.target.value})} 
-                                />
+                                <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Фото (Посилання URL або файл з пристрою)</label>
+                                {[0, 1, 2].map(idx => (
+                                    <div key={idx} className="mb-3 p-3 bg-white/5 rounded-2xl border border-white/5 space-y-2">
+                                        <div className="text-[11px] text-gray-400 font-bold uppercase">Фото {idx + 1}</div>
+                                        <input 
+                                            placeholder={`URL-посилання ${idx + 1}`}
+                                            value={newItem.images && newItem.images[idx] && !newItem.images[idx].startsWith('data:') ? newItem.images[idx] : ''} 
+                                            className="admin-input !mb-1 text-xs" 
+                                            onChange={e => {
+                                                const imgs = [...(newItem.images || ['', '', ''])];
+                                                imgs[idx] = e.target.value;
+                                                setNewItem({...newItem, images: imgs});
+                                            }} 
+                                        />
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs text-gray-500">Або файл:</span>
+                                            <input 
+                                                type="file" 
+                                                accept="image/*"
+                                                className="text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer"
+                                                onChange={e => handleImageFileChange(e, idx, false)}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
                                 
-                                <div className="flex gap-4 mt-4">
+                                <div className="flex gap-4 mt-6">
                                     <button 
                                         onClick={handleAddProduct} 
                                         disabled={isSubmitting}
