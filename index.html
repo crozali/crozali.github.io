@@ -141,6 +141,17 @@
             border-color: #3b82f6;
         }
 
+        /* File Upload Button Styling */
+        .file-upload-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            transition: all 0.2s ease;
+        }
+        .file-upload-btn:hover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
         .social-icon {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -451,6 +462,30 @@
 
             const phone = "380673485909";
 
+            // Helper to convert selected image file to Base64 String
+            const handleFileUpload = (e, targetField, isEditMode = false) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                if (file.size > 2 * 1024 * 1024) {
+                    alert("Розмір файлу перевищує 2MB. Будь ласка, оберіть менший файл!");
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const result = reader.result;
+                    if (isEditMode) {
+                        const imgs = [...(editingProduct.images || [])];
+                        imgs[targetField] = result;
+                        setEditingProduct(prev => ({ ...prev, images: imgs }));
+                    } else {
+                        setNewItem(prev => ({ ...prev, [targetField]: result }));
+                    }
+                };
+                reader.readAsDataURL(file);
+            };
+
             useEffect(() => {
                 const unsubscribeAuth = auth.onAuthStateChanged(user => {
                     setIsAdmin(!!user);
@@ -717,37 +752,53 @@
                                     onChange={e => setEditingProduct({...editingProduct, description: e.target.value})} 
                                 />
 
-                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Посилання на фото (URL)</label>
-                                <input 
-                                    placeholder="Фото 1"
-                                    value={editingProduct.images && editingProduct.images[0] ? editingProduct.images[0] : ''} 
-                                    className="admin-input" 
-                                    onChange={e => {
-                                        const imgs = [...(editingProduct.images || [])];
-                                        imgs[0] = e.target.value;
-                                        setEditingProduct({...editingProduct, images: imgs});
-                                    }} 
-                                />
-                                <input 
-                                    placeholder="Фото 2"
-                                    value={editingProduct.images && editingProduct.images[1] ? editingProduct.images[1] : ''} 
-                                    className="admin-input" 
-                                    onChange={e => {
-                                        const imgs = [...(editingProduct.images || [])];
-                                        imgs[1] = e.target.value;
-                                        setEditingProduct({...editingProduct, images: imgs});
-                                    }} 
-                                />
-                                <input 
-                                    placeholder="Фото 3"
-                                    value={editingProduct.images && editingProduct.images[2] ? editingProduct.images[2] : ''} 
-                                    className="admin-input" 
-                                    onChange={e => {
-                                        const imgs = [...(editingProduct.images || [])];
-                                        imgs[2] = e.target.value;
-                                        setEditingProduct({...editingProduct, images: imgs});
-                                    }} 
-                                />
+                                <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Фотографії товару (Завантажте з пристрою або вкажіть URL)</label>
+                                {[0, 1, 2].map((idx) => (
+                                    <div key={idx} className="mb-3 p-3 bg-black/30 rounded-xl border border-white/5 flex flex-col gap-2">
+                                        <div className="flex items-center justify-between text-xs text-gray-400 font-bold">
+                                            <span>Фото {idx + 1} {idx === 0 && '*'}</span>
+                                            {editingProduct.images && editingProduct.images[idx] && (
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const imgs = [...(editingProduct.images || [])];
+                                                        imgs[idx] = '';
+                                                        setEditingProduct({...editingProduct, images: imgs});
+                                                    }}
+                                                    className="text-red-400 hover:text-red-300 font-normal underline"
+                                                >
+                                                    Видалити фото
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className="flex gap-2 items-center">
+                                            <label className="file-upload-btn cursor-pointer px-3 py-2 rounded-lg text-xs font-bold text-blue-400 flex items-center gap-1 border border-blue-500/30 hover:border-blue-500 shrink-0">
+                                                📁 Обрати файл
+                                                <input 
+                                                    type="file" 
+                                                    accept="image/*" 
+                                                    className="hidden" 
+                                                    onChange={e => handleFileUpload(e, idx, true)} 
+                                                />
+                                            </label>
+                                            <input 
+                                                placeholder="або вставте посилання (https://...)"
+                                                value={editingProduct.images && editingProduct.images[idx] ? editingProduct.images[idx] : ''} 
+                                                className="admin-input !mb-0 text-xs" 
+                                                onChange={e => {
+                                                    const imgs = [...(editingProduct.images || [])];
+                                                    imgs[idx] = e.target.value;
+                                                    setEditingProduct({...editingProduct, images: imgs});
+                                                }} 
+                                            />
+                                        </div>
+                                        {editingProduct.images && editingProduct.images[idx] && (
+                                            <div className="h-14 w-14 rounded-lg overflow-hidden bg-black/50 border border-white/10 mt-1">
+                                                <img src={editingProduct.images[idx]} className="w-full h-full object-cover" alt="Preview" />
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
 
                                 <div className="flex gap-4 mt-4">
                                     <button onClick={handleUpdateProduct} className="flex-1 bg-blue-600 hover:bg-blue-500 py-3.5 rounded-xl font-bold text-white transition">ЗБЕРЕГТИ ЗМІНИ</button>
@@ -873,25 +924,49 @@
                                     onChange={e => setNewItem({...newItem, description: e.target.value})} 
                                 />
                                 
-                                <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Посилання на фото (URL)</label>
-                                <input 
-                                    placeholder="URL Фото 1 (Обов'язково) *" 
-                                    className="admin-input" 
-                                    value={newItem.img1} 
-                                    onChange={e => setNewItem({...newItem, img1: e.target.value})} 
-                                />
-                                <input 
-                                    placeholder="URL Фото 2 (Опціонально)" 
-                                    className="admin-input" 
-                                    value={newItem.img2} 
-                                    onChange={e => setNewItem({...newItem, img2: e.target.value})} 
-                                />
-                                <input 
-                                    placeholder="URL Фото 3 (Опціонально)" 
-                                    className="admin-input" 
-                                    value={newItem.img3} 
-                                    onChange={e => setNewItem({...newItem, img3: e.target.value})} 
-                                />
+                                <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Фотографії товару (Завантажте файл або вставте URL)</label>
+                                {[
+                                    { key: 'img1', label: 'Фото 1 (Головне) *' },
+                                    { key: 'img2', label: 'Фото 2 (Опціонально)' },
+                                    { key: 'img3', label: 'Фото 3 (Опціонально)' }
+                                ].map((item, idx) => (
+                                    <div key={item.key} className="mb-3 p-3 bg-black/30 rounded-xl border border-white/5 flex flex-col gap-2">
+                                        <div className="flex items-center justify-between text-xs text-gray-400 font-bold">
+                                            <span>{item.label}</span>
+                                            {newItem[item.key] && (
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => setNewItem({...newItem, [item.key]: ''})}
+                                                    className="text-red-400 hover:text-red-300 font-normal underline"
+                                                >
+                                                    Видалити фото
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className="flex gap-2 items-center">
+                                            <label className="file-upload-btn cursor-pointer px-3 py-2 rounded-lg text-xs font-bold text-blue-400 flex items-center gap-1 border border-blue-500/30 hover:border-blue-500 shrink-0">
+                                                📁 Обрати файл
+                                                <input 
+                                                    type="file" 
+                                                    accept="image/*" 
+                                                    className="hidden" 
+                                                    onChange={e => handleFileUpload(e, item.key, false)} 
+                                                />
+                                            </label>
+                                            <input 
+                                                placeholder="або URL (https://...)" 
+                                                className="admin-input !mb-0 text-xs" 
+                                                value={newItem[item.key]} 
+                                                onChange={e => setNewItem({...newItem, [item.key]: e.target.value})} 
+                                            />
+                                        </div>
+                                        {newItem[item.key] && (
+                                            <div className="h-14 w-14 rounded-lg overflow-hidden bg-black/50 border border-white/10 mt-1">
+                                                <img src={newItem[item.key]} className="w-full h-full object-cover" alt="Preview" />
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
                                 
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Категорія</label>
                                 <select 
@@ -902,14 +977,14 @@
                                     <option value="male">Чоловіче взуття</option>
                                     <option value="female">Жіноче взуття</option>
                                 </select>
-                                
-                                <div className="flex gap-4 mt-4">
+
+                                <div className="flex gap-4 mt-6">
                                     <button 
                                         onClick={handleAddProduct} 
-                                        disabled={isSubmitting}
+                                        disabled={isSubmitting} 
                                         className="flex-1 bg-blue-600 hover:bg-blue-500 py-3.5 rounded-xl font-bold text-white transition disabled:opacity-50"
                                     >
-                                        {isSubmitting ? 'Збереження...' : 'ЗБЕРЕГТИ'}
+                                        {isSubmitting ? 'Збереження...' : 'ДОДАТИ ТОВАР'}
                                     </button>
                                     <button 
                                         onClick={() => setShowAddForm(false)} 
@@ -925,7 +1000,8 @@
             );
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
         root.render(<App />);
     </script>
 </body>
