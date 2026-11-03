@@ -161,6 +161,7 @@
         const auth = firebase.auth();
 
         const ADMIN_EMAIL = "admin@crozali.local";
+        const FALLBACK_IMAGE = "https://via.placeholder.com/600x600?text=Помилка+завантаження+фото";
 
         const FEMALE_TYPES = ["Жіночі лофери", "Жіночі кеди", "Жіночі кросівки", "Жіночі туфлі", "Жіночі Конверси", "Жіночі каблуки", "Жіночі Снікерси"];
         const MALE_TYPES = ["Чоловічі кеди", "Чоловічі монкі", "Чоловічі туфлі", "Чоловічі кросівки", "Чоловічі лофери"];
@@ -224,22 +225,36 @@
         const ProductCard = React.memo(({ product, onOpen, isAdmin, onDelete, onEdit }) => {
             const [currentImg, setCurrentImg] = useState(0);
             const [isLoaded, setIsLoaded] = useState(false);
+            const [imgSrc, setImgSrc] = useState('');
 
             const discountPercent = calcDiscount(product.price, product.oldPrice);
 
-            useEffect(() => { setIsLoaded(false); }, [currentImg, product.images]);
+            const validImages = useMemo(() => {
+                if (!product.images) return [];
+                const arr = Array.isArray(product.images) ? product.images : [product.images];
+                return arr.filter(img => img && typeof img === 'string' && img.trim() !== '');
+            }, [product.images]);
+
+            useEffect(() => {
+                setIsLoaded(false);
+                if (validImages.length > 0) {
+                    setImgSrc(validImages[currentImg] || validImages[0]);
+                } else {
+                    setImgSrc(FALLBACK_IMAGE);
+                }
+            }, [currentImg, validImages]);
 
             const next = useCallback((e) => { 
                 e.stopPropagation();
-                if (!product.images || product.images.length === 0) return;
-                setCurrentImg(prev => (prev === product.images.length - 1 ? 0 : prev + 1));
-            }, [product.images]);
+                if (validImages.length === 0) return;
+                setCurrentImg(prev => (prev >= validImages.length - 1 ? 0 : prev + 1));
+            }, [validImages]);
 
             const prev = useCallback((e) => { 
                 e.stopPropagation();
-                if (!product.images || product.images.length === 0) return;
-                setCurrentImg(prev => (prev === 0 ? product.images.length - 1 : prev - 1));
-            }, [product.images]);
+                if (validImages.length === 0) return;
+                setCurrentImg(prev => (prev <= 0 ? validImages.length - 1 : prev - 1));
+            }, [validImages]);
 
             return (
                 <div onClick={() => onOpen(product)} className="product-card rounded-3xl overflow-hidden flex flex-col h-full group relative cursor-pointer">
@@ -265,13 +280,17 @@
                         )}
 
                         <img 
-                            src={product.images && product.images.length > 0 ? product.images[currentImg] : 'https://via.placeholder.com/600x600?text=Немає+фото'} 
+                            src={imgSrc || FALLBACK_IMAGE} 
                             onLoad={() => setIsLoaded(true)}
+                            onError={() => {
+                                setIsLoaded(true);
+                                setImgSrc(FALLBACK_IMAGE);
+                            }}
                             className={`w-full h-full object-cover transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`} 
                             alt={product.name}
                         />
 
-                        {product.images && product.images.length > 1 && (
+                        {validImages.length > 1 && (
                             <div className="absolute inset-0 z-20 flex items-center justify-between px-3 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
                                 <button onClick={prev} className="slider-btn pointer-events-auto w-9 h-9 rounded-full text-white flex items-center justify-center shadow-lg font-bold">❮</button>
                                 <button onClick={next} className="slider-btn pointer-events-auto w-9 h-9 rounded-full text-white flex items-center justify-center shadow-lg font-bold">❯</button>
@@ -302,6 +321,8 @@
         function Modal({ product, onClose }) {
             const [currentImg, setCurrentImg] = useState(0);
             const [isLoaded, setIsLoaded] = useState(false);
+            const [imgSrc, setImgSrc] = useState('');
+
             const phone = "380673485909";
             const msg = encodeURIComponent("Добрий день! Цікавить модель: " + product.name);
             const viberUrl = `viber://chat?number=%2B${phone}`;
@@ -309,10 +330,25 @@
 
             const discountPercent = calcDiscount(product.price, product.oldPrice);
 
+            const validImages = useMemo(() => {
+                if (!product.images) return [];
+                const arr = Array.isArray(product.images) ? product.images : [product.images];
+                return arr.filter(img => img && typeof img === 'string' && img.trim() !== '');
+            }, [product.images]);
+
             useEffect(() => { 
                 document.body.style.overflow = 'hidden'; 
                 return () => { document.body.style.overflow = 'unset'; }; 
             }, []);
+
+            useEffect(() => {
+                setIsLoaded(false);
+                if (validImages.length > 0) {
+                    setImgSrc(validImages[currentImg] || validImages[0]);
+                } else {
+                    setImgSrc(FALLBACK_IMAGE);
+                }
+            }, [currentImg, validImages]);
 
             return (
                 <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 md:p-8" onClick={onClose}>
@@ -328,15 +364,19 @@
 
                             {!isLoaded && <div className="absolute inset-0 skeleton flex items-center justify-center text-blue-500 animate-pulse font-bold">Crozali...</div>}
                             <img 
-                                src={product.images && product.images.length > 0 ? product.images[currentImg] : ''} 
+                                src={imgSrc || FALLBACK_IMAGE} 
                                 onLoad={() => setIsLoaded(true)}
+                                onError={() => {
+                                    setIsLoaded(true);
+                                    setImgSrc(FALLBACK_IMAGE);
+                                }}
                                 className={`max-w-full max-h-full object-contain transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`} 
                                 alt={product.name}
                             />
-                            {product.images && product.images.length > 1 && (
+                            {validImages.length > 1 && (
                                 <div className="absolute inset-0 flex items-center justify-between px-4">
-                                    <button onClick={() => { setCurrentImg(prev => (prev === 0 ? product.images.length - 1 : prev - 1)); setIsLoaded(false); }} className="slider-btn w-11 h-11 rounded-full text-white flex items-center justify-center font-bold text-lg">❮</button>
-                                    <button onClick={() => { setCurrentImg(prev => (prev === product.images.length - 1 ? 0 : prev + 1)); setIsLoaded(false); }} className="slider-btn w-11 h-11 rounded-full text-white flex items-center justify-center font-bold text-lg">❯</button>
+                                    <button onClick={() => { setCurrentImg(prev => (prev <= 0 ? validImages.length - 1 : prev - 1)); }} className="slider-btn w-11 h-11 rounded-full text-white flex items-center justify-center font-bold text-lg">❮</button>
+                                    <button onClick={() => { setCurrentImg(prev => (prev >= validImages.length - 1 ? 0 : prev + 1)); }} className="slider-btn w-11 h-11 rounded-full text-white flex items-center justify-center font-bold text-lg">❯</button>
                                 </div>
                             )}
                         </div>
