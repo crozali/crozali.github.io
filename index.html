@@ -163,7 +163,8 @@
         const ADMIN_EMAIL = "admin@crozali.local";
         const FALLBACK_IMAGE = "https://via.placeholder.com/600x600?text=Помилка+завантаження+фото";
 
-        const FEMALE_TYPES = ["Жіночі лофери", "Жіночі кеди", "Жіночі кросівки", "Жіночі туфлі", "Жіночі Конверси", "Жіночі каблуки", "Жіночі Снікерси"];
+        // Добавлено "Жіночі ботинки" в список женских видов обуви
+        const FEMALE_TYPES = ["Жіночі лофери", "Жіночі кеди", "Жіночі кросівки", "Жіночі туфлі", "Жіночі Конверси", "Жіночі каблуки", "Жіночі Снікерси", "Жіночі ботинки"];
         const MALE_TYPES = ["Чоловічі кеди", "Чоловічі монкі", "Чоловічі туфлі", "Чоловічі кросівки", "Чоловічі лофери"];
 
         const SAMPLE_PRODUCTS = [
@@ -206,7 +207,10 @@
             if (lower.includes('монк')) return { type: 'Чоловічі монкі', gender: 'male' };
             if (lower.includes('конверс')) return { type: 'Жіночі Конверси', gender: 'female' };
             if (lower.includes('каблук')) return { type: 'Жіночі каблуки', gender: 'female' };
-            
+            // Автоопределение для ботинок/черевиков
+            if (lower.includes('ботинк') || lower.includes('черевик') || lower.includes('ботинок')) {
+                return isMale ? { type: 'Чоловічі ботинки', gender: 'male' } : { type: 'Жіночі ботинки', gender: 'female' };
+            }
             if (lower.includes('снікерс') || lower.includes('снекерс')) {
                 return isMale ? { type: 'Чоловічі кросівки', gender: 'male' } : { type: 'Жіночі Снікерси', gender: 'female' };
             }
@@ -399,7 +403,7 @@
                                 
                                 <div className="mt-6 p-4 bg-white/5 rounded-2xl border border-white/5 text-xs text-gray-400 space-y-1">
                                     <p>✔ 100% Натуральна шкіра</p>
-                                    <p>✔ Гарантія якості від майстерні</p>
+                                    <p>✔ Гарантія якості від майстерні на 1 місяць</p>
                                     <p>✔ Доставка по всій Україні</p>
                                 </div>
                             </div>
@@ -916,7 +920,7 @@
                         </div>
 
                         <div className="mt-16 pt-8 border-t border-white/5 text-center text-gray-500 text-xs">
-                            © 2026 CROZALI. Всі права захищено.
+                            2026 CROZALI.
                         </div>
                     </footer>
 
@@ -953,7 +957,7 @@
                                 
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-1">Назва моделі (автовизначення типу) *</label>
                                 <input 
-                                    placeholder="напр. Чоловічі лофери Classic" 
+                                    placeholder="напр. Жіночі ботинки Classic" 
                                     className="admin-input" 
                                     value={newItem.name} 
                                     onChange={e => handleNewItemNameChange(e.target.value)} 
